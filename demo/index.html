@@ -68,7 +68,6 @@
   </style>
 </head>
 <body>
-  <img src="https://api-caihuohuo-cn.alikunlun.com/images/2017/04/02/1491148383871.jpg" id="originImg">
   <aside>
     <ul>
       <li><button onclick="pen()">笔</button></li>
@@ -79,7 +78,59 @@
     </ul>
   </aside>
   <script src="photocover.js" charset="utf-8"></script>
+
   <script type="text/javascript">
+    var params = (function () {
+      var search = location.search
+      var mapArr
+      var map = {}
+
+      if (search === '') {
+        return null
+      } else {
+        search = search.slice(1)
+        mapArr = search.split('&')
+
+        for (var i in mapArr) {
+          var temp = mapArr[i].split('=')
+          map[temp[0]] = temp[1]
+        }
+
+        return map
+      }
+    })()
+
+
+    var initImage = function (src, callback) {
+      if (!src) {
+        alert('please set src in location')
+        return
+      }
+
+      var IMG = new Image()
+      IMG.src = src
+      IMG.addEventListener('load', function () {
+        var width, height
+
+        if (IMG.width > 800) {
+          width = 800
+          height = 800 * IMG.height / IMG.width
+          IMG.width = width
+          IMG.height = height
+        }
+
+      })
+
+      IMG.id = 'originImg'
+      document.body.appendChild(IMG)
+    }
+
+    initImage(params.src)
+  </script>
+
+
+  <script type="text/javascript">
+
     var draw = new PhotoCover('#originImg')
 
     function zoomin() {
@@ -104,6 +155,7 @@
 
     window.onkeydown = function (e) {
       console.log(e.keyCode)
+
       if (e.keyCode === 187 || e.key === '+') {
         draw.zoomIn()
       }
