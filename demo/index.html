@@ -61,17 +61,21 @@
       border-radius: 100%;
       background-color: transparent;
     }
+
+    canvas {
+      user-select: none;
+    }
   </style>
 </head>
 <body>
   <img src="https://api-caihuohuo-cn.alikunlun.com/images/2017/04/02/1491148383871.jpg" id="originImg">
   <aside>
     <ul>
-      <li><button><i class="circle"></i></button></li>
-      <li><button><i class="square"></i></button></li>
+      <li><button onclick="pen()">笔</button></li>
+      <li><button onclick="eraser()">橡皮</button></li>
       <li><button onclick="zoomin()" title="press shift + =">+</button></li>
       <li><button onclick="zoomout()" title="press shift + -">-</button></li>
-      <li><button><-</button></li>
+      <li><button onclick="undo()">&lt;-</button></li>
     </ul>
   </aside>
   <script src="photocover.js" charset="utf-8"></script>
@@ -80,6 +84,22 @@
 
     function zoomin() {
       draw.zoomIn()
+    }
+
+    function zoomout() {
+      draw.zoomOut()
+    }
+
+    function eraser() {
+      draw.setEraser()
+    }
+
+    function pen() {
+      draw.setPen()
+    }
+
+    function undo() {
+      draw.undo()
     }
 
     window.onkeydown = function (e) {
@@ -92,9 +112,6 @@
       }
     }
 
-    function zoomout() {
-      draw.zoomOut()
-    }
   </script>
 </body>
 </html>
