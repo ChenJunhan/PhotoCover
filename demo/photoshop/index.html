@@ -7,17 +7,32 @@
   <title>demo</title>
   <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/photoshop.css">
+  <link href="https://cdn.bootcss.com/animate.css/3.5.2/animate.min.css" rel="stylesheet">
 </head>
 <body>
   <aside>
     <ul>
-      <li><button onclick="pen()" name="mouseType" class="selected"><i class="fa fa-pencil"></i></button></li>
-      <li><button onclick="eraser()" name="mouseType"><i class="fa fa-eraser"></i></button></li>
-      <li><button onclick="zoomin()" title="press shift + ="><i class="fa fa-plus"></i></button></li>
-      <li><button onclick="zoomout()" title="press shift + -"><i class="fa fa-minus"></i></button></li>
-      <li><button onclick="undo()"><i class="fa fa-undo"></i></button></li>
+      <li><button id="pen" name="mouseType" class="selected"><i class="fa fa-pencil"></i></button></li>
+      <li><button id="eraser" name="mouseType"><i class="fa fa-eraser"></i></button></li>
+      <li><button id="zoomIn" title="press shift + ="><i class="fa fa-plus"></i></button></li>
+      <li><button id="zoomOut" title="press shift + -"><i class="fa fa-minus"></i></button></li>
+      <li><button id="undo" class="fa fa-undo"></i></button></li>
+      <li>
+          <button class="black colorPicker"><i class="fa fa-stop"></i></button>
+          <div class="color-box animated">
+            <i class="fa fa-stop black"></i>
+            <i class="fa fa-stop red"></i>
+            <i class="fa fa-stop blue"></i>
+            <i class="fa fa-stop lightBlue"></i>
+            <i class="fa fa-stop yellow"></i>
+            <i class="fa fa-stop green"></i>
+            <i class="fa fa-stop purple"></i>
+            <i class="fa fa-stop white"></i>
+          </div>
+      </li>
     </ul>
   </aside>
+  <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
   <script src="js/photocover.js" charset="utf-8"></script>
 
   <script type="text/javascript">
@@ -69,20 +84,12 @@
     initImage(params.src)
 
 
-    var mouseType = document.querySelectorAll('[name=mouseType]')
 
-    Array.prototype.map.call(mouseType, function (btn) {
-
-      btn.addEventListener('click', function () {
-
-        Array.prototype.map.call(mouseType, function (b) {
-          b.setAttribute('class', '')
-        })
-
-        this.setAttribute('class', 'selected')
-
-      }, false)
+    $('[name=mouseType]').on('click', function () {
+      $('[name=mouseType]').removeClass('selected')
+      $(this).addClass('selected')
     })
+
   </script>
 
 
@@ -90,47 +97,80 @@
 
     var draw = new PhotoCover('#originImg')
 
-    function zoomin() {
-      draw.zoomIn()
-    }
-
-    function zoomout() {
-      draw.zoomOut()
-    }
-
-    function eraser() {
-      draw.setEraser()
-    }
-
-    function pen() {
+    $('#pen').click(function () {
       draw.setPen()
-    }
+    })
 
-    function undo() {
+    $('#eraser').click(function () {
+      draw.setEraser()
+    })
+
+    $('#zoomIn').click(function () {
+      draw.zoomIn()
+    })
+
+    $('#zoomOut').click(function () {
+      draw.zoomOut()
+    })
+
+    $('#undo').click(function () {
       draw.undo()
-    }
+    })
 
     window.onkeydown = function (e) {
       if (e.keyCode === 187 || e.key === '+') {
-        draw.zoomIn()
+        $('#zoomIn').click()
       }
 
       if (e.keyCode === 189 || e.key === '_') {
-        draw.zoomOut()
+        $('#zoomOut').click()
       }
 
       if (e.keyCode === 80 || e.key === 'p') {
-        draw.setPen()
+        $('#pen').click()
       }
 
       if (e.keyCode === 69 || e.key === 'e') {
-        draw.setEraser()
+        $('#eraser').click()
       }
 
       if (e.keyCode === 90 || e.key === 'z') {
-        draw.undo()
+        $('#undo').click()
       }
     }
+
+    $('.black').click(function () {
+      draw.setColor('black')
+      $('.colorPicker').css('color', 'black')
+    })
+    $('.red').click(function () {
+      draw.setColor('red')
+      $('.colorPicker').css('color', 'red')
+    })
+    $('.blue').click(function () {
+      draw.setColor('blue')
+      $('.colorPicker').css('color', 'blue')
+    })
+    $('.lightBlue').click(function () {
+      draw.setColor('#00ffff')
+      $('.colorPicker').css('color', '#00ffff')
+    })
+    $('.yellow').click(function () {
+      draw.setColor('yellow')
+      $('.colorPicker').css('color', 'yellow')
+    })
+    $('.green').click(function () {
+      draw.setColor('green')
+      $('.colorPicker').css('color', 'green')
+    })
+    $('.purple').click(function () {
+      draw.setColor('purple')
+      $('.colorPicker').css('color', 'purple')
+    })
+    $('.white').click(function () {
+      draw.setColor('white')
+      $('.colorPicker').css('color', 'white')
+    })
 
   </script>
 </body>

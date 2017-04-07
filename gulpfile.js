@@ -12,10 +12,10 @@ if (isProduction) {
   useSourceMaps = false
 }
 
-let handleError = function(err) {
-  console.log(err.toString())
-  this.emit('end')
-}
+// let handleErr = function(err) {
+//   console.log(err.toString())
+//   this.emit('end')
+// }
 
 const paths = {
   app: 'lib/',
@@ -85,7 +85,7 @@ gulp.task('scripts:demo', () => {
 gulp.task('styles:demo', () => {
   return gulp.src(source.styles.demo)
     .pipe($.if(useSourceMaps, $.sourcemaps.init()))
-    .pipe($.less().on('error', handleError))
+    .pipe($.less().on('error', function () {this.emit('end')}))
     .pipe($.autoprefixer({
       browsers: ['last 2 version']
     }))
