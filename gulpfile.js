@@ -20,26 +20,46 @@ let handleError = function(err) {
 const paths = {
   app: 'lib/',
   dist: 'dist/',
-  scripts: '',
-  demo: 'demo/'
+  scripts: 'js/',
+  less: 'less/',
+  css: 'css/',
+  demo: 'demo/photoshop/'
 }
 
 const source = {
   scripts: {
-    src: paths.app + paths.scripts + '*',
-    watch: paths.app + paths.scripts + '*'
+    src: paths.app + '*',
+    watch: paths.app + '*',
+    demo: paths.demo + paths.scripts + '*'
+  },
+  styles: {
+    demo: paths.demo + paths.less + '*'
+  },
+  html: {
+    demo: [paths.demo + 'index.html']
   }
 }
 
 const build = {
   scripts: {
     dist: paths.dist,
-    demo: paths.demo
+    demo: paths.demo + paths.scripts
+  },
+  styles: {
+    demo: paths.demo + paths.css
   }
 }
 
+
+let handleErr = (err) => {
+  console.log(err.toString())
+  this.emit('end')
+}
+
 gulp.task('watch', () => {
+  gulp.watch(source.html.demo).on('change', reload)
   gulp.watch(source.scripts.watch, ['scripts:demo'])
+  gulp.watch(source.styles.demo, ['styles:demo'])
 })
 
 gulp.task('scripts', () => {
@@ -53,7 +73,7 @@ gulp.task('scripts:demo', () => {
     .pipe($.if(useSourceMaps, $.sourcemaps.init()))
     .pipe($.babel({
       presets: ['es2015']
-    }).on('error', handleError))
+    }).on('error', handleErr))
     .pipe($.if(useSourceMaps, $.sourcemaps.write()))
     .pipe(gulp.dest(build.scripts.demo))
     .pipe($.if(isProduction, reload({
@@ -61,16 +81,33 @@ gulp.task('scripts:demo', () => {
     })))
 })
 
+
+gulp.task('styles:demo', () => {
+  return gulp.src(source.styles.demo)
+    .pipe($.if(useSourceMaps, $.sourcemaps.init()))
+    .pipe($.less().on('error', handleError))
+    .pipe($.autoprefixer({
+      browsers: ['last 2 version']
+    }))
+    .pipe($.if(isProduction, $.cssnano()))
+    .pipe($.if(useSourceMaps, $.sourcemaps.write()))
+    .pipe(gulp.dest(build.styles.demo))
+    .pipe($.if(!isProduction, reload({
+      stream: true
+    })))
+})
+
 gulp.task('browser-sync', () => {
   browserSync.init({
     server: {
-      baseDir: './demo/'
+      baseDir: './demo/photoshop/'
     }
   })
 })
 
 gulp.task('demo', [
   'scripts:demo',
+  'styles:demo',
   'watch',
   'browser-sync'
 ])
