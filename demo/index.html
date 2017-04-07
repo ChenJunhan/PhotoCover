@@ -157,8 +157,6 @@
     }
 
     window.onkeydown = function (e) {
-      console.log(e.keyCode)
-
       if (e.keyCode === 187 || e.key === '+') {
         draw.zoomIn()
       }
@@ -167,15 +165,15 @@
         draw.zoomOut()
       }
 
-      if (e.keyCode === 80) {
+      if (e.keyCode === 80 || e.key === 'p') {
         draw.setPen()
       }
 
-      if (e.keyCode === 69) {
+      if (e.keyCode === 69 || e.key === 'e') {
         draw.setEraser()
       }
 
-      if (e.keyCode === 90) {
+      if (e.keyCode === 90 || e.key === 'z') {
         draw.undo()
       }
     }
