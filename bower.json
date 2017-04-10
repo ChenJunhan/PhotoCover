@@ -1,0 +1,26 @@
+{
+  "name": "PhotoCover",
+  "description": "modify picture, draw something into it to cover some secure information.",
+  "main": "dist/photocover.min.js",
+  "authors": [
+    "Yuchang Wu<mr.wuyuchang@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "photoshop",
+    "photo",
+    "cover",
+    "photocover",
+    "modify",
+    "picture",
+    "mosaic"
+  ],
+  "homepage": "https://github.com/wuyuchang/PhotoCover",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

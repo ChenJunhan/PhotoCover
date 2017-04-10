@@ -97,34 +97,69 @@
 
   <script type="text/javascript">
 
-    var draw = new PhotoCover('#originImg')
+    window.onload = function () {
 
-    $('#pen').click(function () {
-      draw.setPen()
-    })
+      var draw = new PhotoCover('#originImg')
 
-    $('#eraser').click(function () {
-      draw.setEraser()
-    })
+      $('#pen').click(function () {
+        draw.setPen()
+      })
 
-    $('#zoomIn').click(function () {
-      draw.zoomIn()
-    })
+      $('#eraser').click(function () {
+        draw.setEraser()
+      })
 
-    $('#zoomOut').click(function () {
-      draw.zoomOut()
-    })
+      $('#zoomIn').click(function () {
+        draw.zoomIn()
+      })
 
-    $('#undo').click(function () {
-      draw.undo()
-    })
+      $('#zoomOut').click(function () {
+        draw.zoomOut()
+      })
 
-    $('#save').click(function () {
-      var dataurl = draw.getDataURL()
-      // var img = new Image()
-      // img.src = dataurl
-      // document.body.appendChild(img)
-    })
+      $('#undo').click(function () {
+        draw.undo()
+      })
+
+      $('#save').click(function () {
+        var dataurl = draw.getDataURL()
+        // var img = new Image()
+        // img.src = dataurl
+        // document.body.appendChild(img)
+      })
+      $('.black').click(function () {
+        draw.setColor('black')
+        $('.colorPicker').css('color', 'black')
+      })
+      $('.red').click(function () {
+        draw.setColor('red')
+        $('.colorPicker').css('color', 'red')
+      })
+      $('.blue').click(function () {
+        draw.setColor('blue')
+        $('.colorPicker').css('color', 'blue')
+      })
+      $('.lightBlue').click(function () {
+        draw.setColor('#00ffff')
+        $('.colorPicker').css('color', '#00ffff')
+      })
+      $('.yellow').click(function () {
+        draw.setColor('yellow')
+        $('.colorPicker').css('color', 'yellow')
+      })
+      $('.green').click(function () {
+        draw.setColor('green')
+        $('.colorPicker').css('color', 'green')
+      })
+      $('.purple').click(function () {
+        draw.setColor('purple')
+        $('.colorPicker').css('color', 'purple')
+      })
+      $('.white').click(function () {
+        draw.setColor('white')
+        $('.colorPicker').css('color', 'white')
+      })
+    }
 
     window.onkeydown = function (e) {
       if (e.keyCode === 187 || e.key === '+') {
@@ -148,38 +183,7 @@
       }
     }
 
-    $('.black').click(function () {
-      draw.setColor('black')
-      $('.colorPicker').css('color', 'black')
-    })
-    $('.red').click(function () {
-      draw.setColor('red')
-      $('.colorPicker').css('color', 'red')
-    })
-    $('.blue').click(function () {
-      draw.setColor('blue')
-      $('.colorPicker').css('color', 'blue')
-    })
-    $('.lightBlue').click(function () {
-      draw.setColor('#00ffff')
-      $('.colorPicker').css('color', '#00ffff')
-    })
-    $('.yellow').click(function () {
-      draw.setColor('yellow')
-      $('.colorPicker').css('color', 'yellow')
-    })
-    $('.green').click(function () {
-      draw.setColor('green')
-      $('.colorPicker').css('color', 'green')
-    })
-    $('.purple').click(function () {
-      draw.setColor('purple')
-      $('.colorPicker').css('color', 'purple')
-    })
-    $('.white').click(function () {
-      draw.setColor('white')
-      $('.colorPicker').css('color', 'white')
-    })
+
 
   </script>
 </body>
