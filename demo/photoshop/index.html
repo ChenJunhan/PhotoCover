@@ -16,7 +16,8 @@
       <li><button id="eraser" name="mouseType"><i class="fa fa-eraser"></i></button></li>
       <li><button id="zoomIn" title="press shift + ="><i class="fa fa-plus"></i></button></li>
       <li><button id="zoomOut" title="press shift + -"><i class="fa fa-minus"></i></button></li>
-      <li><button id="undo" class="fa fa-undo"></i></button></li>
+      <li><button id="undo"><i class="fa fa-undo"></i></button></li>
+      <li><button id="save" title="save"><i class="fa fa-save"></i></button></li>
       <li>
           <button class="black colorPicker"><i class="fa fa-stop"></i></button>
           <div class="color-box animated">
@@ -78,6 +79,7 @@
       })
 
       IMG.id = 'originImg'
+      IMG.setAttribute('crossOrigin', 'Anonymous')
       document.body.appendChild(IMG)
     }
 
@@ -115,6 +117,13 @@
 
     $('#undo').click(function () {
       draw.undo()
+    })
+
+    $('#save').click(function () {
+      var dataurl = draw.getDataURL()
+      // var img = new Image()
+      // img.src = dataurl
+      // document.body.appendChild(img)
     })
 
     window.onkeydown = function (e) {
