@@ -36,32 +36,32 @@ window.onload = function () {
 ## API
 
 ### initial
-**new PhotoCover(selector)**
+##### new PhotoCover(selector)
 ``` javascript
 // initial photocover
 var draw = new PhotoCover('#img')
 ```
 
 ### mouse tool
-**pen**
+##### pen
 draw.setPen()
 
-**eraser**
+##### eraser
 draw.setEraser()
 
 
 ### change radius of mouse tool
-**zoomIn**
+##### zoomIn
 draw.zoomIn()
 
-**zoomOut**
+##### zoomOut
 draw.zoomOut()
 
 ### undo
-**undo**
+##### undo
 draw.undo()
 
 
 ### dataurl
-**dataurl**
+##### dataurl
 draw.getDataURL()
