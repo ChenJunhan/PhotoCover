@@ -10,6 +10,7 @@
   <link href="https://cdn.bootcss.com/animate.css/3.5.2/animate.min.css" rel="stylesheet">
 </head>
 <body>
+  <img src="../images/cat.jpg" alt="cat" id="originImg">
   <aside>
     <ul>
       <li><button id="pen" name="mouseType" class="selected"><i class="fa fa-pencil"></i></button></li>
@@ -33,132 +34,97 @@
       </li>
     </ul>
   </aside>
-  <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
   <script src="js/photocover.js" charset="utf-8"></script>
 
   <script type="text/javascript">
-    var params = (function () {
-      var search = location.search
-      var mapArr
-      var map = {}
+    window.$ = document.querySelector.bind(document)
 
-      if (search === '') {
-        return null
-      } else {
-        search = search.slice(1)
-        mapArr = search.split('&')
-
-        for (var i in mapArr) {
-          var temp = mapArr[i].split('=')
-          map[temp[0]] = temp[1]
-        }
-
-        return map
-      }
-    })()
-
-
-    var initImage = function (src, callback) {
-      if (!src) {
-        alert('please set src in location')
-        return
-      }
-
-      var IMG = new Image()
-      IMG.src = src
-      IMG.addEventListener('load', function () {
-        var width, height
-
-        if (IMG.width > 800) {
-          width = 800
-          height = 800 * IMG.height / IMG.width
-          IMG.width = width
-          IMG.height = height
-        }
-
-      })
-
-      IMG.id = 'originImg'
-      IMG.setAttribute('crossOrigin', 'Anonymous')
-      document.body.appendChild(IMG)
+    Element.prototype.css = function (property, value) {
+      this.style[property] = value
     }
 
-    initImage(params.src)
+    var simulationRadio = function (name, classname) {
+      var nodes = document.querySelectorAll('[name=' + name + ']')
+      for (var node of nodes) {
+        node.addEventListener('click', function (e) {
+          for (var node of nodes) {
+            node.classList.remove(classname)
+          }
+          this.classList.add(classname)
+        }, false)
+      }
+    }
 
-
-
-    $('[name=mouseType]').on('click', function () {
-      $('[name=mouseType]').removeClass('selected')
-      $(this).addClass('selected')
-    })
-
-  </script>
-
-
-  <script type="text/javascript">
 
     window.onload = function () {
 
+      simulationRadio('mouseType', 'selected')
+
       var draw = new PhotoCover('#originImg')
 
-      $('#pen').click(function () {
+      $('#pen').onclick = function () {
         draw.setPen()
-      })
+      }
 
-      $('#eraser').click(function () {
+      $('#eraser').onclick = function () {
         draw.setEraser()
-      })
+      }
 
-      $('#zoomIn').click(function () {
+      $('#zoomIn').onclick = function () {
         draw.zoomIn()
-      })
+      }
 
-      $('#zoomOut').click(function () {
+      $('#zoomOut').onclick = function () {
         draw.zoomOut()
-      })
+      }
 
-      $('#undo').click(function () {
+      $('#undo').onclick = function () {
         draw.undo()
-      })
+      }
 
-      $('#save').click(function () {
+      $('#save').onclick = function () {
         var dataurl = draw.getDataURL()
-        // var img = new Image()
-        // img.src = dataurl
-        // document.body.appendChild(img)
-      })
-      $('.black').click(function () {
+      }
+
+      $('.black').onclick = function () {
         draw.setColor('black')
         $('.colorPicker').css('color', 'black')
-      })
-      $('.red').click(function () {
+      }
+
+      $('.red').onclick = function () {
         draw.setColor('red')
         $('.colorPicker').css('color', 'red')
-      })
-      $('.blue').click(function () {
+      }
+
+      $('.blue').onclick = function () {
         draw.setColor('blue')
         $('.colorPicker').css('color', 'blue')
-      })
-      $('.lightBlue').click(function () {
+      }
+
+      $('.lightBlue').onclick = function () {
         draw.setColor('#00ffff')
         $('.colorPicker').css('color', '#00ffff')
-      })
-      $('.yellow').click(function () {
+      }
+
+      $('.yellow').onclick = function () {
         draw.setColor('yellow')
         $('.colorPicker').css('color', 'yellow')
-      })
-      $('.green').click(function () {
+      }
+
+      $('.green').onclick = function () {
         draw.setColor('green')
         $('.colorPicker').css('color', 'green')
-      })
-      $('.purple').click(function () {
+      }
+
+      $('.purple').onclick = function () {
         draw.setColor('purple')
         $('.colorPicker').css('color', 'purple')
-      })
-      $('.white').click(function () {
+      }
+
+      $('.white').onclick = function () {
         draw.setColor('white')
         $('.colorPicker').css('color', 'white')
-      })
+      }
     }
 
     window.onkeydown = function (e) {
