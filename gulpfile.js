@@ -81,6 +81,21 @@ gulp.task('scripts:demo', () => {
     })))
 })
 
+gulp.task('scripts', () => {
+  return gulp.src(source.scripts.src)
+    .pipe($.if(useSourceMaps, $.sourcemaps.init()))
+    .pipe($.babel({
+      presets: ['es2015']
+    }).on('error', handleErr))
+    .pipe($.uglify())
+    .pipe($.if(useSourceMaps, $.sourcemaps.write()))
+    .pipe($.if(isProduction, $.rename({suffix: '.min'})))
+    .pipe(gulp.dest(build.scripts.dist))
+    .pipe($.if(!isProduction, reload({
+      stream: true
+    })))
+})
+
 
 gulp.task('styles:demo', () => {
   return gulp.src(source.styles.demo)
@@ -110,4 +125,9 @@ gulp.task('demo', [
   'styles:demo',
   'watch',
   'browser-sync'
+])
+
+
+gulp.task('build', [
+  'scripts'
 ])
