@@ -1,6 +1,6 @@
 {
   "name": "PhotoCover",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "modify picture, draw something into it to cover some secure information.",
   "main": "index.js",
   "scripts": {

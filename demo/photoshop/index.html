@@ -60,7 +60,8 @@
 
       simulationRadio('mouseType', 'selected')
 
-      var draw = new PhotoCover('#originImg')
+      // var draw = new PhotoCover('#originImg')
+      var draw = new PhotoCover(document.querySelector('#originImg'))
 
       $('#pen').onclick = function () {
         draw.setPen()

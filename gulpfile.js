@@ -114,6 +114,7 @@ gulp.task('styles:demo', () => {
 
 gulp.task('browser-sync', () => {
   browserSync.init({
+    port: 5000,
     server: {
       baseDir: './demo/photoshop/'
     }
