@@ -71,9 +71,12 @@ gulp.task('scripts', () => {
 gulp.task('scripts:demo', () => {
   return gulp.src(source.scripts.src)
     .pipe($.if(useSourceMaps, $.sourcemaps.init()))
-    .pipe($.babel({
-      presets: ['es2015']
-    }).on('error', handleErr))
+    .pipe($.typescript({
+      noEmitOnError: true
+    }))
+    // .pipe($.babel({
+    //   presets: ['es2015']
+    // }).on('error', handleErr))
     .pipe($.if(useSourceMaps, $.sourcemaps.write()))
     .pipe(gulp.dest(build.scripts.demo))
     .pipe($.if(isProduction, reload({
@@ -84,7 +87,7 @@ gulp.task('scripts:demo', () => {
 gulp.task('scripts', () => {
   return gulp.src(source.scripts.src)
     .pipe($.if(useSourceMaps, $.sourcemaps.init()))
-    .pipe($.ts())
+    .pipe($.typescript().on('error', handleErr))
     // .pipe($.babel({
     //   presets: ['es2015']
     // }).on('error', handleErr))

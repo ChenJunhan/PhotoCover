@@ -11,60 +11,45 @@ const DEFAULT_OPTIONS = {
 }
 
 class PhotoCover {
-  constructor(selector) {
-    this.radius = DEFAULT_OPTIONS.RADIUS
-    this.maxWidth = DEFAULT_OPTIONS.MAX_WIDTH
-    this.color = DEFAULT_OPTIONS.COLOR
-    this.linecap= DEFAULT_OPTIONS.LINECAP
-    this.mouseType = DEFAULT_OPTIONS.MOUSE
-    this.isMobile = navigator.userAgent.indexOf('iPhone') > -1 || navigator.userAgent.indexOf('Android') > -1
+  win: Window = window
+  doc: HTMLDocument = document
+  body: HTMLElement = document.body
 
-    this.operateHistories = []
+  mouse: any
+  width: number // width of canvas and image
+  height: number // height of canvas and image
+  left: number  // 
+  top: number 
+  canvas: HTMLCanvasElement = document.createElement('canvas')
+  ctx: CanvasRenderingContext2D = this.canvas.getContext('2d') as CanvasRenderingContext2D
 
-    // selector
-    if (typeof selector === 'object') {
-      this.img = selector
+  radius = DEFAULT_OPTIONS.RADIUS   // radius of each circle of line
+  maxWidth = DEFAULT_OPTIONS.MAX_WIDTH
+  color = DEFAULT_OPTIONS.COLOR // draw color
+  linecap= DEFAULT_OPTIONS.LINECAP // 
+  mouseType = DEFAULT_OPTIONS.MOUSE
+  readonly isMobile = navigator.userAgent.indexOf('iPhone') > -1 || navigator.userAgent.indexOf('Android') > -1
+  operateHistories = []
+  img: HTMLImageElement 
 
-      // image element
-    } else if (typeof selector === 'string') {
-      this.img = document.querySelector(selector)
-    }
+  registeredEvents: Array<Array<string | number>>
 
-    this.win = window
-    this.doc = document
-    this.body = this.doc.body
+  constructor(selector: HTMLImageElement | string) {
 
-    this.mouse
-    this.width
-    this.height
-    this.left
-    this.top
-    this.canvas
-    this.ctx
-
-    // format = [{
-    //   element: window,
-    //   events: [function () {}, function () {}]
-    // }]
-    this.registeredEvents = []
+    if (typeof selector === 'object') { this.img = selector }
+    else if (typeof selector === 'string') { this.img = document.querySelector(selector) as HTMLImageElement }
+    
+    // initial canvas and its size and position
+    this.width = this.img.width
+    this.height = this.img.height
 
     this._init()
   }
 
-  _init() {
-    if (!this.img) {
-      throw Error('No Image Selected')
-      return
-    }
+  _init(): void {
 
     let [body, win, img] = [this.body, this.win, this.img]
 
-    // initial canvas and its size and position
-    this.width = img.width
-    this.height = img.height
-
-    this.canvas = document.createElement('canvas')
-    this.ctx = this.canvas.getContext('2d')
     this._async()
 
     this.canvas.width = img.width

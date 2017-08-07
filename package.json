@@ -28,5 +28,8 @@
     "gulp-uglify": "^2.1.2",
     "run-sequence": "^1.2.2",
     "yargs": "^7.0.2"
+  },
+  "dependencies": {
+    "typescript": "^2.4.2"
   }
 }
