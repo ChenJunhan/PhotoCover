@@ -1,0 +1,527 @@
+'use strict';
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var DEFAULT_OPTIONS = {
+  RADIUS: 20,
+  MAX_WIDTH: 800,
+  COLOR: 'black',
+  MOUSE: 'pen',
+  PEN_BORDER_COLOR: 'red',
+  ERASER_BORDER_COLOR: '#666',
+  PEN: 'pen',
+  ERASER: 'eraser',
+  LINECAP: 'round'
+};
+
+var PhotoCover = function () {
+  function PhotoCover(selector) {
+    _classCallCheck(this, PhotoCover);
+
+    this.radius = DEFAULT_OPTIONS.RADIUS;
+    this.maxWidth = DEFAULT_OPTIONS.MAX_WIDTH;
+    this.color = DEFAULT_OPTIONS.COLOR;
+    this.linecap = DEFAULT_OPTIONS.LINECAP;
+    this.mouseType = DEFAULT_OPTIONS.MOUSE;
+    this.isMobile = navigator.userAgent.indexOf('iPhone') > -1 || navigator.userAgent.indexOf('Android') > -1;
+
+    this.operateHistories = [];
+
+    // selector
+    if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object') {
+      this.img = selector;
+
+      // image element
+    } else if (typeof selector === 'string') {
+      this.img = document.querySelector(selector);
+    }
+
+    this.win = window;
+    this.doc = document;
+    this.body = this.doc.body;
+
+    this.mouse;
+    this.width;
+    this.height;
+    this.left;
+    this.top;
+    this.canvas;
+    this.ctx;
+
+    // format = [{
+    //   element: window,
+    //   events: [function () {}, function () {}]
+    // }]
+    this.registeredEvents = [];
+
+    this._init();
+  }
+
+  _createClass(PhotoCover, [{
+    key: '_init',
+    value: function _init() {
+      var _this = this;
+
+      if (!this.img) {
+        throw Error('No Image Selected');
+        return;
+      }
+
+      var _ref = [this.body, this.win, this.img],
+          body = _ref[0],
+          win = _ref[1],
+          img = _ref[2];
+
+      // initial canvas and its size and position
+
+      this.width = img.width;
+      this.height = img.height;
+
+      this.canvas = document.createElement('canvas');
+      this.ctx = this.canvas.getContext('2d');
+      this._async();
+
+      this.canvas.width = img.width;
+      this.canvas.height = img.height;
+
+      body.appendChild(this.canvas);
+
+      if (!this.isMobile) {
+        this._initMouse();
+      }
+
+      // async canvas position and size during browser resize
+      var resize = function (e) {
+        _this._async();
+      }.bind(this);
+      win.addEventListener('resize', resize, false);
+      this._pushRegisteredEvents(win, 'resize', resize);
+
+      var currentOperate = [];
+
+      var canvasMouseDown = function (e) {
+        e.preventDefault();
+
+        var _getCoordinateByEvent = _this.getCoordinateByEvent(e),
+            _getCoordinateByEvent2 = _slicedToArray(_getCoordinateByEvent, 2),
+            x = _getCoordinateByEvent2[0],
+            y = _getCoordinateByEvent2[1];
+
+        _this.ctx.moveTo(x, y);
+
+        currentOperate = [];
+
+        if (_this.isOnCanvas(x, y, true)) {
+          _this.ctx.beginPath();
+          currentOperate.push(['MOVE_TO', x, y]);
+
+          if (!_this.isMobile) {
+            win.addEventListener('mousemove', canvasMouseMove, false);
+          } else {
+            win.addEventListener('touchmove', canvasMouseMove, false);
+          }
+        }
+      }.bind(this);
+
+      var canvasMouseMove = function (e) {
+        e.preventDefault();
+        currentOperate.push(_this.drawByEvent(e));
+      }.bind(this);
+
+      var canvasMouseUp = function (e) {
+        e.preventDefault();
+
+        if (!_this.isMobile) {
+          win.removeEventListener('mousemove', canvasMouseMove, false);
+        } else {
+          win.removeEventListener('touchmove', canvasMouseMove, false);
+        }
+
+        var coordinate = _this.getCoordinateByEvent(e);
+        var _ref2 = [e.pageX, e.pageY],
+            x = _ref2[0],
+            y = _ref2[1];
+
+
+        if (_this.isOnCanvas(x, y)) {
+          _this.operateHistories.push(currentOperate);
+          currentOperate = [];
+          console.log(_this.operateHistories);
+        }
+      }.bind(this);
+
+      // canvas down
+      if (!this.isMobile) {
+        win.addEventListener('mousedown', canvasMouseDown, false);
+        this._pushRegisteredEvents(win, 'mousedown', canvasMouseDown);
+
+        win.addEventListener('mouseup', canvasMouseUp, false);
+        this._pushRegisteredEvents(win, 'mouseup', canvasMouseUp);
+      } else {
+        win.addEventListener('touchstart', canvasMouseDown, false);
+        this._pushRegisteredEvents(win, 'touchstart', canvasMouseDown);
+
+        win.addEventListener('touchend', canvasMouseUp, false);
+        this._pushRegisteredEvents(win, 'touchend', canvasMouseUp);
+      }
+    }
+
+    // async x and y from image to canvas
+
+  }, {
+    key: '_async',
+    value: function _async() {
+      var coordinate = this.img.getBoundingClientRect();
+      this.top = coordinate.top;
+      this.left = coordinate.left;
+
+      this.canvas.style.cssText = '\n      position: absolute;\n      left: ' + (this.left + this.body.scrollLeft) + 'px;\n      top: ' + (this.top + this.body.scrollTop) + 'px;\n      use-select: none;\n    ';
+    }
+
+    /**
+     * save binds events
+     * @param  {DOM} _element  DOM that you bind event
+     * @param  {String} _event  event name
+     * @param  {Function} _function event function
+     * @return {Boolean} true when save success
+     */
+
+  }, {
+    key: '_pushRegisteredEvents',
+    value: function _pushRegisteredEvents(_element, _event, _function) {
+
+      this.registeredEvents.push({
+        'element': _element,
+        'event': _event,
+        'function': _function
+      });
+
+      return true;
+    }
+
+    // initial mouse shape where mouse on canvas
+
+  }, {
+    key: '_initMouse',
+    value: function _initMouse(type) {
+      var _this2 = this;
+
+      var _ref3 = [this.body, this.win],
+          body = _ref3[0],
+          win = _ref3[1];
+
+      var mouse = document.createElement('div');
+      mouse.style.cssText = '\n      display: none;\n      position: absolute;\n      left: 0;\n      top: 0;\n      z-index: 10001;\n      width: ' + this.radius * 2 + 'px;\n      height: ' + this.radius * 2 + 'px;\n      border: 1px solid red;\n      border-radius: 100%;\n    ';
+      this.mouse = mouse;
+
+      body.appendChild(mouse);
+
+      var mouseMove = function (e) {
+        var _ref4 = [e.pageX, e.pageY],
+            x = _ref4[0],
+            y = _ref4[1];
+
+        var isOnCanvas = _this2.isOnCanvas(x, y);
+
+        mouse.style.transform = 'translate(' + (x - _this2.radius) + 'px, ' + (y - _this2.radius) + 'px)';
+
+        if (!isOnCanvas) {
+          mouse.style.display = 'none';
+          body.style.cursor = 'default';
+        } else {
+          mouse.style.display = 'block';
+          body.style.cursor = 'none';
+        }
+      }.bind(this);
+
+      // change mouse style
+      if (!this.isMobile) {
+        win.addEventListener('mousemove', mouseMove, false);
+        this._pushRegisteredEvents(win, 'mousemove', mouseMove);
+      } else {
+        win.addEventListener('touchmove', mouseMove, false);
+        this._pushRegisteredEvents(win, 'touchmove', mouseMove);
+      }
+    }
+  }, {
+    key: 'setRadius',
+    value: function setRadius(radius) {
+      if (radius < 2 || radius > 100) {
+        return;
+      }
+
+      var mouse = this.mouse;
+      this.radius = radius;
+
+      mouse.style.width = radius * 2 + 'px';
+      mouse.style.height = radius * 2 + 'px';
+    }
+  }, {
+    key: 'zoomIn',
+    value: function zoomIn() {
+      var radius = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
+
+      this.setRadius(this.radius + radius);
+    }
+  }, {
+    key: 'zoomOut',
+    value: function zoomOut() {
+      var radius = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
+
+      this.setRadius(this.radius - radius);
+    }
+  }, {
+    key: 'drawCircle',
+    value: function drawCircle(x, y, radius) {
+      var ctx = this.ctx;
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(x + 1, y + 1, radius || this.radius, 0, 360);
+      ctx.fill();
+      ctx.closePath();
+    }
+  }, {
+    key: 'drawLine',
+    value: function drawLine(x, y, radius) {
+      var ctx = this.ctx;
+
+      ctx.lineCap = this.linecap;
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = radius * 2 || this.radius * 2;
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+  }, {
+    key: 'getCoordinateByEvent',
+    value: function getCoordinateByEvent(event) {
+      var x = void 0,
+          y = void 0;
+      var _ref5 = [this.doc, this.body],
+          doc = _ref5[0],
+          body = _ref5[1];
+
+      var canvas = this.canvas;
+
+      if (this.isMobile) {
+        event = event.changedTouches[0];
+      }
+
+      if (event.pageX || event.pageY) {
+        x = event.pageX;
+        y = event.pageY;
+      } else {
+        x = event.clientX + body.scrollLeft + doc.documentElement.scrollLeft;
+        y = event.clientY + body.scrollTop + doc.documentElement.scrollTop;
+      }
+
+      x -= canvas.offsetLeft;
+      y -= canvas.offsetTop;
+
+      // console.log(x, y)
+
+      return [x, y];
+    }
+  }, {
+    key: 'drawByEvent',
+    value: function drawByEvent(event) {
+      if (!this.ctx) return;
+
+      var ctx = this.ctx;
+
+      var _getCoordinateByEvent3 = this.getCoordinateByEvent(event),
+          _getCoordinateByEvent4 = _slicedToArray(_getCoordinateByEvent3, 2),
+          x = _getCoordinateByEvent4[0],
+          y = _getCoordinateByEvent4[1];
+
+      if (this.mouseType === DEFAULT_OPTIONS.PEN) {
+        this.drawLine(x, y);
+        // this.drawCircle(x, y)
+        return [DEFAULT_OPTIONS.PEN, this.color, x, y, this.radius];
+      } else if (this.mouseType === DEFAULT_OPTIONS.ERASER) {
+        x -= this.radius;
+        y -= this.radius;
+        var w = this.radius * 2,
+            h = this.radius * 2;
+
+        ctx.clearRect(x, y, w, h);
+        return [DEFAULT_OPTIONS.ERASER, x, y, w, h];
+      }
+    }
+  }, {
+    key: 'isOnCanvas',
+    value: function isOnCanvas(x, y) {
+      var isRelative = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      var body = this.body;
+      var scrollTop = body.scrollTop;
+
+      if (isRelative) {
+        if (x < 0 || x > this.width || y < 0 || y > this.height) {
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        if (x < this.left || x > this.left + this.width || y < scrollTop + this.top || y > scrollTop + this.top + this.height) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+  }, {
+    key: 'setMaxWidth',
+    value: function setMaxWidth(width) {
+      this.maxWidth = width;
+    }
+  }, {
+    key: 'setColor',
+    value: function setColor(color) {
+      this.color = color;
+    }
+
+    // pen, eraser
+
+  }, {
+    key: 'setTool',
+    value: function setTool(tool) {
+      this.mouseType = tool;
+
+      if (tool.toLowerCase() === DEFAULT_OPTIONS.PEN) {
+        this.setPen();
+      } else if (tool.toLowerCase() === DEFAULT_OPTIONS.ERASER) {
+        this.setEraser();
+      }
+    }
+  }, {
+    key: 'setPen',
+    value: function setPen() {
+      var mouse = this.mouse;
+      Object.assign(mouse.style, {
+        borderRadius: '100%',
+        border: '1px solid ' + DEFAULT_OPTIONS.PEN_BORDER_COLOR
+      });
+
+      this.mouseType = DEFAULT_OPTIONS.PEN;
+    }
+  }, {
+    key: 'setEraser',
+    value: function setEraser() {
+      var mouse = this.mouse;
+      Object.assign(mouse.style, {
+        borderRadius: 0,
+        border: '1px dashed ' + DEFAULT_OPTIONS.ERASER_BORDER_COLOR
+      });
+
+      this.mouseType = DEFAULT_OPTIONS.ERASER;
+    }
+  }, {
+    key: 'undo',
+    value: function undo() {
+      var _this3 = this;
+
+      var ctx = this.ctx;
+      var color = this.color;
+
+      ctx.save();
+
+      ctx.clearRect(0, 0, this.width, this.height);
+      this.operateHistories.pop();
+
+      this.operateHistories.map(function (steps) {
+        steps.map(function (step) {
+          if (step[0] === DEFAULT_OPTIONS.PEN) {
+            _this3.color = step[1];
+            _this3.radius = step[4];
+            _this3.drawLine(step[2], step[3], step[4]);
+            _this3.drawCircle.apply(_this3, step.slice(2));
+          } else if (step[0] === DEFAULT_OPTIONS.ERASER) {
+            ctx.clearRect.apply(ctx, step.slice(1));
+          } else if (step[0] === 'MOVE_TO') {
+            ctx.beginPath(step[1], step[2]);
+            ctx.moveTo.apply(ctx, step.slice(1));
+          }
+        });
+      });
+
+      console.log(this.operateHistories.length);
+
+      this.color = color;
+      ctx.restore();
+    }
+
+    /**
+     * get image origin size
+     * @param  {String}   src      iamge source url
+     * @param  {Function} callback callback function, width as first parameter and height as second
+     * @return {undefined}
+     */
+
+  }, {
+    key: 'getImageOriginSize',
+    value: function getImageOriginSize(src, callback) {
+      var img = new Image();
+
+      img.onload = function () {
+        var width = img.width;
+        var height = img.height;
+
+        callback(width, height);
+      };
+
+      img.src = src;
+    }
+  }, {
+    key: 'getDataURL',
+    value: function getDataURL() {
+      var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'image/jpeg';
+
+      var _this4 = this;
+
+      var quality = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.8;
+      var callback = arguments[2];
+
+
+      var src = this.img.src;
+
+      this.getImageOriginSize(src, function (width, height) {
+        var tempCanvas = document.createElement('canvas');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        var tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(_this4.img, 0, 0, width, height);
+        tempCtx.drawImage(_this4.canvas, 0, 0, width, height);
+
+        callback(tempCanvas.toDataURL(type, quality));
+      });
+    }
+
+    /**
+     * remove dom that added into body,
+     * remove all events that registered
+     * @return {undefined}
+     */
+
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      this.canvas.parentNode.removeChild(this.canvas);
+      this.mouse.parentNode.removeChild(this.mouse);
+
+      this.img.src = '';
+
+      this.registeredEvents.forEach(function (v) {
+        v.element.removeEventListener(v.event, v.function, false);
+      });
+      delete this;
+    }
+  }]);
+
+  return PhotoCover;
+}();
