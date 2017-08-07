@@ -84,9 +84,10 @@ gulp.task('scripts:demo', () => {
 gulp.task('scripts', () => {
   return gulp.src(source.scripts.src)
     .pipe($.if(useSourceMaps, $.sourcemaps.init()))
-    .pipe($.babel({
-      presets: ['es2015']
-    }).on('error', handleErr))
+    .pipe($.ts())
+    // .pipe($.babel({
+    //   presets: ['es2015']
+    // }).on('error', handleErr))
     .pipe($.uglify())
     .pipe($.if(useSourceMaps, $.sourcemaps.write()))
     .pipe($.if(isProduction, $.rename({suffix: '.min'})))
