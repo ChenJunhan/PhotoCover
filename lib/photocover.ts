@@ -7,6 +7,7 @@ class PhotoCover {
   static DEFAULT_PEN_BORDER_COLOR: string = 'red'
   static DEFAULT_ERASER_BORDER_COLOR:string = '#666'
   static DEFAULT_LINECAP: string = 'round'
+  static DEFAULT_LINEJOIN: string = 'round'
 
   readonly isMobile = navigator.userAgent.indexOf('iPhone') > -1 || navigator.userAgent.indexOf('Android') > -1
 
@@ -31,7 +32,8 @@ class PhotoCover {
   radius =  PhotoCover.DEFAULT_RADIUS    // default radius of pen
   maxWidth = PhotoCover.DEFAULT_MAX_WIDTH     // default max width of image
   color = PhotoCover.DEFAULT_COLOR    // default color of canvas
-  linecap = PhotoCover.DEFAULT_LINECAP    // default linecap of line on canvas
+  lineCap = PhotoCover.DEFAULT_LINECAP    // default linecap of line on canvas
+  lineJoin = PhotoCover.DEFAULT_LINEJOIN // default lineJoin of line on canvas
 
   histories: any[][] = []    // operate history
   bindedEvents: any[][] = []    // registered events [node, type, function]
@@ -204,6 +206,17 @@ class PhotoCover {
     this.setRadius(this.radius - radius)
   }
 
+
+  lineTo(x: number, y: number): void {
+    const ctx = this.ctx
+    ctx.lineCap = this.lineCap
+    ctx.lineJoin = 'round'
+    ctx.strokeStyle = this.color
+    ctx.lineWidth = this.radius * 2
+    ctx.lineTo(x, y)
+    ctx.stroke()
+  }
+
   drawCircle(x: number, y: number, radius?: number): any[] {
     let ctx = this.ctx
     ctx.fillStyle = this.color;
@@ -215,35 +228,28 @@ class PhotoCover {
     return [MouseType.PEN, this.color, x, y, this.radius]
   }
 
-  drawLine(x: number, y: number, radius?: number): any[] {
-    const ctx = this.ctx
-
-    ctx.lineCap = this.linecap
-    ctx.lineJoin = 'round'
-    ctx.strokeStyle = this.color
-    ctx.lineWidth = (radius || this.radius) * 2
-    ctx.lineTo(x, y)
-    ctx.stroke()
-
+  drawLine(x: number, y: number): any[] {
+    this.ctx.globalCompositeOperation = 'source-over'
+    this.lineCap = 'round'
+    this.lineJoin = 'round'
+    this.lineTo(x, y)
     return [MouseType.PEN, this.color, x, y, this.radius]
   }
 
-  drawByEvent(event: any): Array<any> {
-    let ctx = this.ctx
+  erase(x: number, y: number): any[] {
+    this.ctx.globalCompositeOperation = 'destination-out'
+    this.lineCap = 'round'
+    this.lineJoin = 'round'
+    this.lineTo(x, y)
+    return [MouseType.ERASER, x, y, this.radius]
+  }
+
+  drawByEvent(event: any): any[] {
     let [x, y] = this.getCoordinateByEvent(event)
 
-    if (this.mouseType === MouseType.PEN) {
-      this.drawLine(x, y)
-      return [MouseType.PEN, this.color, x, y, this.radius]
-    } else if (this.mouseType === MouseType.ERASER) {
-      x -= this.radius
-      y -= this.radius
-      let [w, h] = [this.radius * 2, this.radius * 2]
-      ctx.clearRect(x, y, w, h)
-      return [MouseType.ERASER, x, y, w, h]
-    } else {
-      return []
-    }
+    if (this.mouseType === MouseType.PEN) { return this.drawLine(x, y) }
+    else if (this.mouseType === MouseType.ERASER) { return this.erase(x, y) }
+    else { return [] }
   }
 
   getCoordinateByEvent(event: any) {
@@ -314,7 +320,7 @@ class PhotoCover {
 
   setEraser() {
     (Object as any).assign(this.mouse.style, {
-      borderRadius: 0,
+      borderRadius: '100%',
       border: `1px dashed ${PhotoCover.DEFAULT_ERASER_BORDER_COLOR}`
     })
 
@@ -334,9 +340,10 @@ class PhotoCover {
       steps.map((step: Array<any>) => {
         if (step[0] === MouseType.PEN) {
           this.color = step[1]
-          this.drawLine(step[2], step[3], step[4])
+          this.radius = step[4]
+          this.drawLine(step[2], step[3])
         } else if (step[0] === MouseType.ERASER) {
-          ctx.clearRect.apply(ctx, step.slice(1))
+          this.erase(step[1], step[2])
         } else if (step[0] === 'MOVE_TO') {
           ctx.beginPath()
           ctx.moveTo.apply(ctx, step.slice(1))
