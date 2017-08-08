@@ -10,30 +10,31 @@ class PhotoCover {
 
   readonly isMobile = navigator.userAgent.indexOf('iPhone') > -1 || navigator.userAgent.indexOf('Android') > -1
 
-  // Window | DOM
+  // cache window, document and body for speed up performance
   win: Window = window
   doc: HTMLDocument = document
   body: HTMLElement = document.body
-  mouse: HTMLDivElement 
+
+  mouse: HTMLDivElement   // mouse pointer on canvas
   canvas: HTMLCanvasElement = document.createElement('canvas')
-  img: HTMLImageElement 
+  img: HTMLImageElement  // image that you want to change 
 
   ctx: CanvasRenderingContext2D = this.canvas.getContext('2d') as CanvasRenderingContext2D
 
-  width: number
-  height: number
-  left: number
-  top: number
+  width: number    // width of image after render
+  height: number  // height of image after render
+  left: number    // absolute left relative body of image
+  top: number     // absolute top relative body of image
 
   // init value
-  mouseType: MouseType = MouseType.PEN
-  radius =  PhotoCover.DEFAULT_RADIUS
-  maxWidth = PhotoCover.DEFAULT_MAX_WIDTH
-  color = PhotoCover.DEFAULT_COLOR
-  linecap = PhotoCover.DEFAULT_LINECAP
+  mouseType: MouseType = MouseType.PEN    // default mouse pointer
+  radius =  PhotoCover.DEFAULT_RADIUS    // default radius of pen
+  maxWidth = PhotoCover.DEFAULT_MAX_WIDTH     // default max width of image
+  color = PhotoCover.DEFAULT_COLOR    // default color of canvas
+  linecap = PhotoCover.DEFAULT_LINECAP    // default linecap of line on canvas
 
-  operateHistories: Array<Array<any>> = []
-  registeredEvents: Array<any> = []
+  operateHistories: any[][] = []    // operate history
+  bindedEvents: any[][] = []    // registered events [node, type, function]
 
   constructor(selector: HTMLImageElement | string) {
 
@@ -43,6 +44,8 @@ class PhotoCover {
     // initial canvas and its size and position
     this.width = this.img.width
     this.height = this.img.height
+    this.canvas.width = this.img.width
+    this.canvas.height = this.img.height
 
     this.init()
   }
@@ -52,10 +55,6 @@ class PhotoCover {
     let [body, win, img] = [this.body, this.win, this.img]
 
     this.async()
-
-    this.canvas.width = img.width
-    this.canvas.height = img.height
-
     body.appendChild(this.canvas)
 
     if (!this.isMobile) { this.initMouse() }
@@ -65,10 +64,10 @@ class PhotoCover {
       this.async()
     }).bind(this)
     win.addEventListener('resize', resize, false)
-    this.pushRegisteredEvents(win, 'resize', resize)
+    this.bindedEvents.push([win, 'resize', resize])
 
 
-    let currentOperate: Array<Array<any>> = []
+    let currentOperate: any[][] = []
 
     let canvasMouseDown = ((e: any) => {
       e.preventDefault()
@@ -79,6 +78,8 @@ class PhotoCover {
       currentOperate = []
 
       if (this.isOnCanvas(x, y, true)) {
+
+        // currentOperate.push(this.drawByEvent(e))
 
         this.ctx.beginPath()
         currentOperate.push(['MOVE_TO', x, y])
@@ -106,23 +107,22 @@ class PhotoCover {
       if (this.isOnCanvas(x, y)) {
         this.operateHistories.push(currentOperate)
         currentOperate = []
-        console.log(this.operateHistories)
       }
     }).bind(this)
 
     // canvas down
     if (!this.isMobile) {
       win.addEventListener('mousedown', canvasMouseDown, false)
-      this.pushRegisteredEvents(win, 'mousedown', canvasMouseDown)
+      this.bindedEvents.push([win, 'mousedown', canvasMouseDown])
 
       win.addEventListener('mouseup', canvasMouseUp, false)
-      this.pushRegisteredEvents(win, 'mouseup', canvasMouseUp) 
+      this.bindedEvents.push([win, 'mouseup', canvasMouseUp]) 
     } else {
       win.addEventListener('touchstart', canvasMouseDown, false)
-      this.pushRegisteredEvents(win, 'touchstart', canvasMouseDown)
+      this.bindedEvents.push([win, 'touchstart', canvasMouseDown])
 
       win.addEventListener('touchend', canvasMouseUp, false)
-      this.pushRegisteredEvents(win, 'touchend', canvasMouseUp)
+      this.bindedEvents.push([win, 'touchend', canvasMouseUp])
     }
   }
 
@@ -138,25 +138,6 @@ class PhotoCover {
       top: ${this.top + this.body.scrollTop}px;
       use-select: none;
     `
-  }
-
-  /**
-   * save binds events
-   * @param  {DOM} _element  DOM that you bind event
-   * @param  {String} _event  event name
-   * @param  {Function} _function event function
-   * @return {Boolean} true when save success
-   */
-  private pushRegisteredEvents(_element: Window | Node, _event: any, _function: Function) {
-
-    this.registeredEvents.push({
-      'element': _element,
-      'event': _event,
-      'function': _function
-    })
-
-    return true
-
   }
 
   // initial mouse shape where mouse on canvas
@@ -196,10 +177,10 @@ class PhotoCover {
     // change mouse style
     if (!this.isMobile) {
       win.addEventListener('mousemove', mouseMove, false)
-      this.pushRegisteredEvents(win, 'mousemove', mouseMove)
+      this.bindedEvents.push([win, 'mousemove', mouseMove])
     } else {
       win.addEventListener('touchmove', mouseMove, false)
-      this.pushRegisteredEvents(win, 'touchmove', mouseMove)
+      this.bindedEvents.push([win, 'touchmove', mouseMove])
     }
   }
 
@@ -359,8 +340,6 @@ class PhotoCover {
       })
     })
 
-    console.log(this.operateHistories.length)
-
     this.color = color
     ctx.restore()
   }
@@ -413,8 +392,8 @@ class PhotoCover {
 
     this.img.src = ''
 
-    this.registeredEvents.forEach(v => {
-      v.element.removeEventListener(v.event, v.function, false)
+    this.bindedEvents.forEach(v => {
+      v[0].removeEventListener(v[1], v[2], false)
     })
     // delete this
   }
