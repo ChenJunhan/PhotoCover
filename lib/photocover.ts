@@ -340,9 +340,10 @@ class PhotoCover {
       steps.map((step: Array<any>) => {
         if (step[0] === MouseType.PEN) {
           this.color = step[1]
-          this.radius = step[4]
+          this.setRadius(step[4])
           this.drawLine(step[2], step[3])
         } else if (step[0] === MouseType.ERASER) {
+          this.setRadius(step[3])
           this.erase(step[1], step[2])
         } else if (step[0] === 'MOVE_TO') {
           ctx.beginPath()

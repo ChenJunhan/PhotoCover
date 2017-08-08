@@ -62,12 +62,6 @@ gulp.task('watch', () => {
   gulp.watch(source.styles.demo, ['styles:demo'])
 })
 
-gulp.task('scripts', () => {
-  return gulp.src(source.scripts.src)
-    .gulp.dest(build.scripts.dist)
-    .gulp.dest(build.scripts.demo)
-})
-
 gulp.task('scripts:demo', () => {
   return gulp.src(source.scripts.src)
     .pipe($.if(useSourceMaps, $.sourcemaps.init()))
