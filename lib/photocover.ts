@@ -15,7 +15,7 @@ class PhotoCover {
   doc: HTMLDocument = document
   body: HTMLElement = document.body
 
-  mouse: any
+  mouse: HTMLDivElement 
   width: number // width of canvas and image
   height: number // height of canvas and image
   left: number  // 
@@ -29,10 +29,10 @@ class PhotoCover {
   linecap= DEFAULT_OPTIONS.LINECAP // 
   mouseType = DEFAULT_OPTIONS.MOUSE
   readonly isMobile = navigator.userAgent.indexOf('iPhone') > -1 || navigator.userAgent.indexOf('Android') > -1
-  operateHistories = []
+  operateHistories: Array<Array<any>> = []
   img: HTMLImageElement 
 
-  registeredEvents: Array<Array<string | number>>
+  registeredEvents: Array<any> = []
 
   constructor(selector: HTMLImageElement | string) {
 
@@ -60,16 +60,16 @@ class PhotoCover {
     if (!this.isMobile) { this._initMouse() }
 
     // async canvas position and size during browser resize
-    let resize = (e => {
+    let resize = ((e: any) => {
       this._async()
     }).bind(this)
     win.addEventListener('resize', resize, false)
     this._pushRegisteredEvents(win, 'resize', resize)
 
 
-    let currentOperate = []
+    let currentOperate: Array<Array<any>> = []
 
-    let canvasMouseDown = ((e) => {
+    let canvasMouseDown = ((e: any) => {
       e.preventDefault()
 
       const [x, y] = this.getCoordinateByEvent(e)
@@ -88,12 +88,12 @@ class PhotoCover {
       
     }).bind(this)
 
-    let canvasMouseMove = ((e) => {
+    let canvasMouseMove = ((e: any) => {
       e.preventDefault()
       currentOperate.push(this.drawByEvent(e))
     }).bind(this)
 
-    let canvasMouseUp = ((e) => {
+    let canvasMouseUp = ((e: any) => {
       e.preventDefault()
 
       if (!this.isMobile) { win.removeEventListener('mousemove', canvasMouseMove, false) }
@@ -146,7 +146,7 @@ class PhotoCover {
    * @param  {Function} _function event function
    * @return {Boolean} true when save success
    */
-  _pushRegisteredEvents(_element, _event, _function) {
+  _pushRegisteredEvents(_element: Window | Node, _event: any, _function: Function) {
 
     this.registeredEvents.push({
       'element': _element,
@@ -159,7 +159,7 @@ class PhotoCover {
   }
 
   // initial mouse shape where mouse on canvas
-  _initMouse(type) {
+  _initMouse(type?: string) {
     let [body, win] = [this.body, this.win]
     let mouse = document.createElement('div')
     mouse.style.cssText = `
@@ -177,7 +177,7 @@ class PhotoCover {
 
     body.appendChild(mouse)
 
-    let mouseMove = ((e) => {
+    let mouseMove = ((e: any) => {
       let [x, y] = [e.pageX, e.pageY]
       let isOnCanvas = this.isOnCanvas(x, y)
 
@@ -202,7 +202,7 @@ class PhotoCover {
     }
   }
 
-  setRadius(radius) {
+  setRadius(radius: number) {
     if (radius < 2 || radius > 100) {
       return
     }
@@ -222,7 +222,7 @@ class PhotoCover {
     this.setRadius(this.radius - radius)
   }
 
-  drawCircle(x, y, radius) {
+  drawCircle(x: number, y: number, radius?: number) {
     let ctx = this.ctx
     ctx.fillStyle = this.color;
     ctx.beginPath()
@@ -231,10 +231,11 @@ class PhotoCover {
     ctx.closePath()
   }
 
-  drawLine(x, y, radius) {
+  drawLine(x: number, y: number, radius?: number) {
     const ctx = this.ctx
 
     ctx.lineCap = this.linecap
+    ctx.lineJoin = 'round'
     ctx.strokeStyle = this.color
     ctx.lineWidth = (radius || this.radius) * 2
     ctx.lineTo(x, y)
@@ -242,7 +243,7 @@ class PhotoCover {
   }
 
 
-  getCoordinateByEvent(event) {
+  getCoordinateByEvent(event: any) {
     let x, y
     let [doc, body] = [this.doc, this.body]
     let canvas = this.canvas
@@ -263,15 +264,12 @@ class PhotoCover {
     return [x, y]
   }
 
-  drawByEvent(event) {
-    if (!this.ctx) return
-
+  drawByEvent(event: any): Array<any> {
     let ctx = this.ctx
     let [x, y] = this.getCoordinateByEvent(event)
 
     if (this.mouseType === DEFAULT_OPTIONS.PEN) {
       this.drawLine(x, y)
-      // this.drawCircle(x, y)
       return [DEFAULT_OPTIONS.PEN, this.color, x, y, this.radius]
     } else if (this.mouseType === DEFAULT_OPTIONS.ERASER) {
       x -= this.radius
@@ -279,10 +277,12 @@ class PhotoCover {
       let [w, h] = [this.radius * 2, this.radius * 2]
       ctx.clearRect(x, y, w, h)
       return [DEFAULT_OPTIONS.ERASER, x, y, w, h]
+    } else {
+      return []
     }
   }
 
-  isOnCanvas(x, y, isRelative = false) {
+  isOnCanvas(x: number, y: number, isRelative:boolean = false) {
     let body = this.body
     let scrollTop = body.scrollTop
 
@@ -295,16 +295,16 @@ class PhotoCover {
     }
   }
 
-  setMaxWidth(width) {
+  setMaxWidth(width: number) {
     this.maxWidth = width
   }
 
-  setColor(color) {
+  setColor(color: string) {
     this.color = color
   }
 
   // pen, eraser
-  setTool(tool) {
+  setTool(tool: string) {
     this.mouseType = tool
 
     if (tool.toLowerCase() === DEFAULT_OPTIONS.PEN) {
@@ -316,8 +316,7 @@ class PhotoCover {
 
 
   setPen() {
-    let mouse = this.mouse
-    Object.assign(mouse.style, {
+    (Object as any).assign(this.mouse.style, {
       borderRadius: '100%',
       border: `1px solid ${DEFAULT_OPTIONS.PEN_BORDER_COLOR}`
     })
@@ -326,8 +325,7 @@ class PhotoCover {
   }
 
   setEraser() {
-    let mouse = this.mouse
-    Object.assign(mouse.style, {
+    (Object as any).assign(this.mouse.style, {
       borderRadius: 0,
       border: `1px dashed ${DEFAULT_OPTIONS.ERASER_BORDER_COLOR}`
     })
@@ -344,15 +342,15 @@ class PhotoCover {
     ctx.clearRect(0, 0, this.width, this.height)
     this.operateHistories.pop()
 
-    this.operateHistories.map((steps) => {
-      steps.map((step) => {
+    this.operateHistories.map((steps: Array<any>) => {
+      steps.map((step: Array<any>) => {
         if (step[0] === DEFAULT_OPTIONS.PEN) {
           this.color = step[1]
           this.drawLine(step[2], step[3], step[4])
         } else if (step[0] === DEFAULT_OPTIONS.ERASER) {
           ctx.clearRect.apply(ctx, step.slice(1))
         } else if (step[0] === 'MOVE_TO') {
-          ctx.beginPath(step[1], step[2])
+          ctx.beginPath()
           ctx.moveTo.apply(ctx, step.slice(1))
         }
       })
@@ -371,32 +369,34 @@ class PhotoCover {
    * @param  {Function} callback callback function, width as first parameter and height as second
    * @return {undefined}
    */
-  getImageOriginSize(src, callback) {
+  getImageOriginSize(src: string, callback?: Function) {
     let img = new Image()
 
     img.onload = () => {
       let width = img.width
       let height = img.height
 
-      callback(width, height)
+      callback && callback(width, height)
     }
 
     img.src = src
   }
 
-  getDataURL(type = 'image/jpeg', quality = 0.8, callback) {
+  getDataURL(type = 'image/jpeg', quality = 0.8, callback?: Function) {
 
     let src = this.img.src
 
-    this.getImageOriginSize(src, (width, height) => {
+    this.getImageOriginSize(src, (width: number, height: number) => {
       let tempCanvas = document.createElement('canvas')
       tempCanvas.width = width
       tempCanvas.height = height
       let tempCtx = tempCanvas.getContext('2d')
-      tempCtx.drawImage(this.img, 0, 0, width, height)
-      tempCtx.drawImage(this.canvas, 0, 0, width, height)
+      if (tempCtx) {
+        tempCtx.drawImage(this.img, 0, 0, width, height)
+        tempCtx.drawImage(this.canvas, 0, 0, width, height)
 
-      callback(tempCanvas.toDataURL(type, quality))
+        callback && callback(tempCanvas.toDataURL(type, quality))
+      }
     })
   }
 
@@ -406,14 +406,14 @@ class PhotoCover {
    * @return {undefined}
    */
   destroy() {
-    this.canvas.parentNode.removeChild(this.canvas)
-    this.mouse.parentNode.removeChild(this.mouse)
+    this.canvas.parentNode && this.canvas.parentNode.removeChild(this.canvas)
+    this.mouse.parentNode && this.mouse.parentNode.removeChild(this.mouse)
 
     this.img.src = ''
 
     this.registeredEvents.forEach(v => {
       v.element.removeEventListener(v.event, v.function, false)
     })
-    delete this
+    // delete this
   }
 }
