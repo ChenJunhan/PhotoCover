@@ -22,11 +22,6 @@ class PhotoCover {
 
   ctx: CanvasRenderingContext2D = this.canvas.getContext('2d') as CanvasRenderingContext2D
 
-  width: number    // width of image after render
-  height: number  // height of image after render
-  left: number    // absolute left relative body of image
-  top: number     // absolute top relative body of image
-
   // init value
   mouseType: MouseType = MouseType.PEN    // default mouse pointer
   radius =  PhotoCover.DEFAULT_RADIUS    // default radius of pen
@@ -44,8 +39,6 @@ class PhotoCover {
     else if (typeof selector === 'string') { this.img = document.querySelector(selector) as HTMLImageElement }
     
     // initial canvas and its size and position
-    this.width = this.img.width
-    this.height = this.img.height
     this.canvas.width = this.img.width
     this.canvas.height = this.img.height
 
@@ -78,7 +71,7 @@ class PhotoCover {
 
       currentOperate = []
 
-      if (this.isOnCanvas(x, y, true)) {
+      if (this.isOnCanvas(e.pageX, e.pageY)) {
 
         this.ctx.beginPath()
         currentOperate.push(['MOVE_TO', x, y])
@@ -130,14 +123,10 @@ class PhotoCover {
 
   // async x and y from image to canvas
   private async() {
-    let coordinate = this.img.getBoundingClientRect()
-    this.top = coordinate.top
-    this.left = coordinate.left
-
     this.canvas.style.cssText = `
       position: absolute;
-      left: ${this.left + this.body.scrollLeft}px;
-      top: ${this.top + this.body.scrollTop}px;
+      left: ${this.img.offsetLeft}px;
+      top: ${this.img.offsetTop}px;
       use-select: none;
     `
   }
@@ -254,37 +243,28 @@ class PhotoCover {
 
   getCoordinateByEvent(event: any) {
     let x, y
-    let [doc, body] = [this.doc, this.body]
-    let canvas = this.canvas
+    let [win, canvas] = [this.win, this.canvas]
 
     if (this.isMobile) { event = event.changedTouches[0] }
 
-    if (event.pageX || event.pageY) {
-      x = event.pageX
-      y = event.pageY
-    } else {
-      x = event.clientX + body.scrollLeft + doc.documentElement.scrollLeft
-      y = event.clientY + body.scrollTop + doc.documentElement.scrollTop
-    }
+    x = event.pageX - canvas.offsetLeft
+    y = event.pageY - canvas.offsetTop
 
-    x -= canvas.offsetLeft
-    y -= canvas.offsetTop
+    console.log(win.pageYOffset)
 
     return [x, y]
   }
 
 
-  isOnCanvas(x: number, y: number, isRelative:boolean = false) {
-    let body = this.body
-    let scrollTop = body.scrollTop
+  isOnCanvas(pageX: number, pageY: number): boolean {
+    if (
+      pageX < this.img.offsetLeft ||
+      pageX > (this.img.offsetLeft + this.img.width) ||
+      pageY < this.img.offsetTop ||
+      pageY > (this.img.offsetTop + this.img.height)
+    ) { return false}
 
-    if (isRelative) {
-      if (x < 0 || x > this.width || y < 0 || y > this.height) { return false }
-      else { return true }
-    } else {
-      if (x < this.left || x > (this.left + this.width) || y < (scrollTop + this.top) || y > (scrollTop + this.top + this.height)) { return false }
-      else { return true }
-    }
+    return true
   }
 
   setMaxWidth(width: number) {
@@ -333,7 +313,7 @@ class PhotoCover {
 
     ctx.save()
 
-    ctx.clearRect(0, 0, this.width, this.height)
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     this.histories.pop()
 
     this.histories.map((steps: Array<any>) => {
