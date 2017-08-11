@@ -180,11 +180,14 @@ class PhotoCover {
       return
     }
 
-    let mouse = this.mouse
     this.radius = radius
 
-    mouse.style.width = radius * 2 + 'px'
-    mouse.style.height = radius * 2 + 'px'
+    let mouse = this.mouse
+
+    if (mouse) {
+      mouse.style.width = radius * 2 + 'px'
+      mouse.style.height = radius * 2 + 'px'
+    }
   }
 
   zoomIn(radius:number = 2) {
@@ -243,14 +246,10 @@ class PhotoCover {
 
   getCoordinateByEvent(event: any) {
     let x, y
-    let [win, canvas] = [this.win, this.canvas]
-
     if (this.isMobile) { event = event.changedTouches[0] }
 
-    x = event.pageX - canvas.offsetLeft
-    y = event.pageY - canvas.offsetTop
-
-    console.log(win.pageYOffset)
+    x = event.pageX - this.canvas.offsetLeft
+    y = event.pageY - this.canvas.offsetTop
 
     return [x, y]
   }
@@ -290,19 +289,23 @@ class PhotoCover {
   }
 
   setPen() {
-    (Object as any).assign(this.mouse.style, {
-      borderRadius: '100%',
-      border: `1px solid ${PhotoCover.DEFAULT_PEN_BORDER_COLOR}`
-    })
+    if (this.mouse) {
+      (Object as any).assign(this.mouse.style, {
+        borderRadius: '100%',
+        border: `1px solid ${PhotoCover.DEFAULT_PEN_BORDER_COLOR}`
+      })
+    }
 
     this.mouseType = MouseType.PEN
   }
 
   setEraser() {
-    (Object as any).assign(this.mouse.style, {
-      borderRadius: '100%',
-      border: `1px dashed ${PhotoCover.DEFAULT_ERASER_BORDER_COLOR}`
-    })
+    if (this.mouse) {
+      (Object as any).assign(this.mouse.style, {
+        borderRadius: '100%',
+        border: `1px dashed ${PhotoCover.DEFAULT_ERASER_BORDER_COLOR}`
+      })
+    }
 
     this.mouseType = MouseType.ERASER
   }

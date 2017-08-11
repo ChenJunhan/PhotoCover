@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,9 +15,10 @@
     }
   </style>
 </head>
+
 <body>
   <img src="images/cat.jpg" alt="cat" id="originImg">
-   <aside>
+  <aside>
     <ul>
       <li><button id="pen" name="mouseType" class="selected"><i class="fa fa-pencil"></i></button></li>
       <li><button id="eraser" name="mouseType"><i class="fa fa-eraser"></i></button></li>
@@ -25,138 +27,22 @@
       <li><button id="undo"><i class="fa fa-undo"></i></button></li>
       <li><button id="save" title="save"><i class="fa fa-save"></i></button></li>
       <li>
-          <button class="colorPicker" style="color: black"><i class="fa fa-stop"></i></button>
-          <div class="color-box animated">
-            <i class="fa fa-stop black"></i>
-            <i class="fa fa-stop red"></i>
-            <i class="fa fa-stop blue"></i>
-            <i class="fa fa-stop lightBlue"></i>
-            <i class="fa fa-stop yellow"></i>
-            <i class="fa fa-stop green"></i>
-            <i class="fa fa-stop purple"></i>
-            <i class="fa fa-stop white"></i>
-          </div>
+        <button class="colorPicker" style="color: black"><i class="fa fa-stop"></i></button>
+        <div class="color-box animated">
+          <i class="fa fa-stop black"></i>
+          <i class="fa fa-stop red"></i>
+          <i class="fa fa-stop blue"></i>
+          <i class="fa fa-stop lightBlue"></i>
+          <i class="fa fa-stop yellow"></i>
+          <i class="fa fa-stop green"></i>
+          <i class="fa fa-stop purple"></i>
+          <i class="fa fa-stop white"></i>
+        </div>
       </li>
     </ul>
-  </aside> 
-   <script src="js/photocover.js" charset="utf-8"></script>
-
-  <script type="text/javascript">
-    window.$ = document.querySelector.bind(document)
-
-    Element.prototype.css = function (property, value) {
-      this.style[property] = value
-    }
-
-    var simulationRadio = function (name, classname) {
-      var nodes = document.querySelectorAll('[name=' + name + ']')
-      for (var node of nodes) {
-        node.addEventListener('click', function (e) {
-          for (var node of nodes) {
-            node.classList.remove(classname)
-          }
-          this.classList.add(classname)
-        }, false)
-      }
-    }
-
-
-    window.onload = function () {
-
-      simulationRadio('mouseType', 'selected')
-
-      // var draw = new PhotoCover('#originImg')
-      var draw = new PhotoCover(document.querySelector('#originImg'))
-
-      $('#pen').onclick = function () {
-        draw.setPen()
-      }
-
-      $('#eraser').onclick = function () {
-        draw.setEraser()
-      }
-
-      $('#zoomIn').onclick = function () {
-        draw.zoomIn()
-      }
-
-      $('#zoomOut').onclick = function () {
-        draw.zoomOut()
-      }
-
-      $('#undo').onclick = function () {
-        draw.undo()
-      }
-
-      $('#save').onclick = function () {
-        var dataurl = draw.getDataURL()
-      }
-
-      $('.black').onclick = function () {
-        draw.setColor('black')
-        $('.colorPicker').css('color', 'black')
-      }
-
-      $('.red').onclick = function () {
-        draw.setColor('red')
-        $('.colorPicker').css('color', 'red')
-      }
-
-      $('.blue').onclick = function () {
-        draw.setColor('blue')
-        $('.colorPicker').css('color', 'blue')
-      }
-
-      $('.lightBlue').onclick = function () {
-        draw.setColor('#00ffff')
-        $('.colorPicker').css('color', '#00ffff')
-      }
-
-      $('.yellow').onclick = function () {
-        draw.setColor('yellow')
-        $('.colorPicker').css('color', 'yellow')
-      }
-
-      $('.green').onclick = function () {
-        draw.setColor('green')
-        $('.colorPicker').css('color', 'green')
-      }
-
-      $('.purple').onclick = function () {
-        draw.setColor('purple')
-        $('.colorPicker').css('color', 'purple')
-      }
-
-      $('.white').onclick = function () {
-        draw.setColor('white')
-        $('.colorPicker').css('color', 'white')
-      }
-    }
-
-    window.onkeydown = function (e) {
-      if (e.keyCode === 187 || e.key === '+') {
-        $('#zoomIn').click()
-      }
-
-      if (e.keyCode === 189 || e.key === '_') {
-        $('#zoomOut').click()
-      }
-
-      if (e.keyCode === 80 || e.key === 'p') {
-        $('#pen').click()
-      }
-
-      if (e.keyCode === 69 || e.key === 'e') {
-        $('#eraser').click()
-      }
-
-      if (e.keyCode === 90 || e.key === 'z') {
-        $('#undo').click()
-      }
-    }
-
-
-
-  </script> 
+  </aside>
+  <script src="js/photocover.js" charset="utf-8"></script>
+  <script src="js/main.js" charset="utf-8"></script>
 </body>
+
 </html>
