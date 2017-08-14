@@ -32,6 +32,9 @@ window.onload = function () {
     draw.setEraser()
   }, false)
 
+  $('#mosaic').addEventListener(click, function () {
+    draw.setMosaic()
+  }, false)
   $('#zoomIn').addEventListener(click, function () {
     draw.zoomIn()
   }, false)

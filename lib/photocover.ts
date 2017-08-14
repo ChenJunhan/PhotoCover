@@ -1,4 +1,11 @@
-enum MouseType { PEN, ERASER }
+enum MouseType { PEN, ERASER, MOSAIC }
+
+interface Rect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
 
 class PhotoCover {
   static DEFAULT_RADIUS:number = 20
@@ -47,7 +54,7 @@ class PhotoCover {
 
   private init(): void {
 
-    let [body, win] = [this.body, this.win]
+    let [body, win, doc] = [this.body, this.win, this.doc]
 
     this.async()
     body.appendChild(this.canvas)
@@ -64,10 +71,16 @@ class PhotoCover {
 
     let currentOperate: any[][] = []
 
-    let mouseDownOnCanvas = false
+    let mouseDownOnCanvas: boolean = false
+    let mosaicSelection: HTMLDivElement
+    let startX: number
+    let startY: number
+
     let canvasMouseDown = ((e: any) => {
       e.preventDefault()
 
+      startX = e.pageX
+      startY = e.pageY
       const [x, y] = this.getCoordinateByEvent(e)
 
       currentOperate = []
@@ -75,51 +88,72 @@ class PhotoCover {
       if (this.isOnCanvas(e.pageX, e.pageY)) {
         mouseDownOnCanvas = true
 
-        this.ctx.beginPath()
-        currentOperate.push(['MOVE_TO', x, y])
-        currentOperate.push(this.drawByEvent(e))
+        if (this.mouseType === MouseType.PEN || this.mouseType === MouseType.ERASER) {
+          this.ctx.beginPath()
+          currentOperate.push(['MOVE_TO', x, y])
+          currentOperate.push(this.drawByEvent(e))
 
-        this.ctx.beginPath()
-        currentOperate.push(['MOVE_TO', x, y])
+          this.ctx.beginPath()
+          currentOperate.push(['MOVE_TO', x, y])
 
-        if (!this.isMobile) { win.addEventListener('mousemove', canvasMouseMove, false) }
-        else { win.addEventListener('touchmove', canvasMouseMove, false) }
+
+        } else if (this.mouseType === MouseType.MOSAIC) {
+          mosaicSelection = doc.createElement('div')
+          mosaicSelection.style.cssText = `
+            position: absolute;
+            left: ${startX}px;
+            top: ${startY}px;
+            width: 0;
+            height: 0;
+            border: 1px dashed #ddd;
+            background-color: rgba(125, 125, 125, 0.5)
+
+          `
+          body.appendChild(mosaicSelection)
+        }
+
+        win.addEventListener(this.isMobile ? 'touchmove' : 'mousemove', canvasMouseMove, false)
       }
       
     }).bind(this)
 
     let canvasMouseMove = ((e: any) => {
       e.preventDefault()
-      currentOperate.push(this.drawByEvent(e))
+      if (this.mouseType === MouseType.PEN || this.mouseType === MouseType.ERASER) {
+        currentOperate.push(this.drawByEvent(e))
+      } else if (this.mouseType === MouseType.MOSAIC) {
+        let rect = this.caculateRect(startX, startY, e.pageX, e.pageY)
+        rect = this.limitRect(rect)
+
+        mosaicSelection.style.left = rect.left - 1 + 'px'
+        mosaicSelection.style.top = rect.top - 1 + 'px'
+        mosaicSelection.style.width = rect.width + 'px'
+        mosaicSelection.style.height = rect.height + 'px'
+      }
     }).bind(this)
 
     let canvasMouseUp = ((e: any) => {
       e.preventDefault()
-
-      if (!this.isMobile) { win.removeEventListener('mousemove', canvasMouseMove, false) }
-      else { win.removeEventListener('touchmove', canvasMouseMove, false) }
+      win.removeEventListener(this.isMobile ? 'touchmove': 'mousemove', canvasMouseMove, false)
       
       if (mouseDownOnCanvas) {
-        this.histories.push(currentOperate)
-        currentOperate = []
-        mouseDownOnCanvas  = false
+        if (this.mouseType === MouseType.PEN || this.mouseType === MouseType.ERASER) {
+          this.histories.push(currentOperate)
+          currentOperate = []
+          mouseDownOnCanvas  = false
+        } else if (this.mouseType === MouseType.MOSAIC) {
+          
+          body.removeChild(mosaicSelection)
+        }
       }
     }).bind(this)
 
     // canvas down
-    if (!this.isMobile) {
-      win.addEventListener('mousedown', canvasMouseDown, false)
-      this.bindedEvents.push([win, 'mousedown', canvasMouseDown])
+    win.addEventListener(this.isMobile ? 'touchstart': 'mousedown', canvasMouseDown, false)
+    this.bindedEvents.push([win, this.isMobile ? 'touchstart': 'mousedown', canvasMouseDown])
 
-      win.addEventListener('mouseup', canvasMouseUp, false)
-      this.bindedEvents.push([win, 'mouseup', canvasMouseUp]) 
-    } else {
-      win.addEventListener('touchstart', canvasMouseDown, false)
-      this.bindedEvents.push([win, 'touchstart', canvasMouseDown])
-
-      win.addEventListener('touchend', canvasMouseUp, false)
-      this.bindedEvents.push([win, 'touchend', canvasMouseUp])
-    }
+    win.addEventListener(this.isMobile ? 'touchend': 'mouseup', canvasMouseUp, false)
+    this.bindedEvents.push([win, this.isMobile ? 'touchend': 'mouseup', canvasMouseUp])
   }
 
   // async x and y from image to canvas
@@ -161,19 +195,19 @@ class PhotoCover {
         mouse.style.display = 'none'
         body.style.cursor = 'default'
       } else {
-        mouse.style.display = 'block'
-        body.style.cursor = 'none'
+        if (this.mouseType === MouseType.MOSAIC) {
+          mouse.style.display = 'none'
+          body.style.cursor = 'crosshair'
+        } else {
+          mouse.style.display = 'block'
+          body.style.cursor = 'none'
+        }
       }
     }).bind(this)
 
     // change mouse style
-    if (!this.isMobile) {
-      win.addEventListener('mousemove', mouseMove, false)
-      this.bindedEvents.push([win, 'mousemove', mouseMove])
-    } else {
-      win.addEventListener('touchmove', mouseMove, false)
-      this.bindedEvents.push([win, 'touchmove', mouseMove])
-    }
+    win.addEventListener(this.isMobile ? 'touchmove': 'mousemove', mouseMove, false)
+    this.bindedEvents.push([win, this.isMobile ? 'touchmove': 'mousemove', mouseMove])
   }
 
   setRadius(radius: number) {
@@ -210,17 +244,6 @@ class PhotoCover {
     ctx.stroke()
   }
 
-  drawCircle(x: number, y: number, radius?: number): any[] {
-    let ctx = this.ctx
-    ctx.fillStyle = this.color;
-    ctx.beginPath()
-    ctx.arc(x + 1, y + 1, radius || this.radius, 0, 360)
-    ctx.fill()
-    ctx.closePath()
-
-    return [MouseType.PEN, this.color, x, y, this.radius]
-  }
-
   drawLine(x: number, y: number): any[] {
     this.ctx.globalCompositeOperation = 'source-over'
     this.lineCap = 'round'
@@ -255,6 +278,43 @@ class PhotoCover {
     return [x, y]
   }
 
+  limitRect(rect: Rect): Rect {
+    let newRect = JSON.parse(JSON.stringify(rect))
+
+    if (rect.left < this.canvas.offsetLeft) {
+      newRect.width = rect.left + rect.width - this.canvas.offsetLeft
+      newRect.left = this.canvas.offsetLeft
+    }
+
+    if (rect.top < this.canvas.offsetTop) {
+      newRect.height = rect.top + rect.height - this.canvas.offsetTop
+      newRect.top = this.canvas.offsetTop
+    }
+
+    if (rect.left + rect.width > this.canvas.offsetLeft + this.canvas.clientWidth) {
+      newRect.width = this.canvas.offsetLeft + this.canvas.clientWidth - rect.left
+    }
+
+    if (rect.top + rect.height > this.canvas.offsetTop + this.canvas.clientHeight) {
+      newRect.height = this.canvas.offsetTop + this.canvas.clientHeight - rect.top
+    }
+
+    return newRect
+  }
+
+  caculateRect(startX: number, startY: number, endX: number, endY: number): Rect {
+    let [w, h] = [endX - startX, endY - startY]
+
+    let left = w < 0 ? startX - Math.abs(w):  startX
+    let top = h < 0 ? startY - Math.abs(h): startY
+
+    return {
+      left: left,
+      top: top,
+      width: Math.abs(w),
+      height: Math.abs(h) 
+    }
+  }
 
   isOnCanvas(pageX: number, pageY: number): boolean {
     if (
@@ -286,6 +346,7 @@ class PhotoCover {
       this.setPen()
     } else if (tool === MouseType.ERASER) {
       this.setEraser()
+    } else if (tool = MouseType.MOSAIC) {
     }
   }
 
@@ -309,6 +370,10 @@ class PhotoCover {
     }
 
     this.mouseType = MouseType.ERASER
+  }
+
+  setMosaic() {
+    this.mouseType = MouseType.MOSAIC
   }
 
   undo() {
