@@ -64,6 +64,7 @@ class PhotoCover {
 
     let currentOperate: any[][] = []
 
+    let mouseDownOnCanvas = false
     let canvasMouseDown = ((e: any) => {
       e.preventDefault()
 
@@ -72,6 +73,7 @@ class PhotoCover {
       currentOperate = []
 
       if (this.isOnCanvas(e.pageX, e.pageY)) {
+        mouseDownOnCanvas = true
 
         this.ctx.beginPath()
         currentOperate.push(['MOVE_TO', x, y])
@@ -97,11 +99,10 @@ class PhotoCover {
       if (!this.isMobile) { win.removeEventListener('mousemove', canvasMouseMove, false) }
       else { win.removeEventListener('touchmove', canvasMouseMove, false) }
       
-      let [x, y] = [e.pageX, e.pageY]
-
-      if (this.isOnCanvas(x, y)) {
+      if (mouseDownOnCanvas) {
         this.histories.push(currentOperate)
         currentOperate = []
+        mouseDownOnCanvas  = false
       }
     }).bind(this)
 
