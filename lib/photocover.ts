@@ -69,6 +69,10 @@ class PhotoCover {
     this.bindedEvents.push([win, 'resize', resize])
 
 
+    // this.img.style.cssText = `opacity: 0.4`
+    // this.img.style.opacity = '0'
+    this.ctx.drawImage(this.img, 0, 0, this.canvas.width, this.canvas.height)
+
     let currentOperate: any[][] = []
 
     let mouseDownOnCanvas: boolean = false
@@ -122,8 +126,7 @@ class PhotoCover {
       if (this.mouseType === MouseType.PEN || this.mouseType === MouseType.ERASER) {
         currentOperate.push(this.drawByEvent(e))
       } else if (this.mouseType === MouseType.MOSAIC) {
-        let rect = this.caculateRect(startX, startY, e.pageX, e.pageY)
-        rect = this.limitRect(rect)
+        let rect = this.limitRect(this.caculateRect(startX, startY, e.pageX, e.pageY))
 
         mosaicSelection.style.left = rect.left - 1 + 'px'
         mosaicSelection.style.top = rect.top - 1 + 'px'
@@ -137,13 +140,26 @@ class PhotoCover {
       win.removeEventListener(this.isMobile ? 'touchmove': 'mousemove', canvasMouseMove, false)
       
       if (mouseDownOnCanvas) {
+        mouseDownOnCanvas  = false
         if (this.mouseType === MouseType.PEN || this.mouseType === MouseType.ERASER) {
           this.histories.push(currentOperate)
           currentOperate = []
-          mouseDownOnCanvas  = false
         } else if (this.mouseType === MouseType.MOSAIC) {
-          
+          let rect = this.limitRect(this.caculateRect(startX, startY, e.pageX, e.pageY))
+          let [x, y] = [rect.left - this.canvas.offsetLeft, rect.top - this.canvas.offsetTop] // coodinate relative canvas
+
+          if (rect.width > 0 && rect.height > 0) {
+            let imageData = this.ctx.getImageData(x, y, rect.width, rect.height)
+            this.ctx.putImageData(this.mosaic(imageData), x, y, 0, 0, rect.width, rect.height)
+
+            this.histories.push([[MouseType.MOSAIC, x, y, rect.width, rect.height]])
+          }
+
           body.removeChild(mosaicSelection)
+        }
+
+        if (this.mouseType === MouseType.ERASER) {
+          this.combineWithBackground()
         }
       }
     }).bind(this)
@@ -257,7 +273,50 @@ class PhotoCover {
     this.lineCap = 'round'
     this.lineJoin = 'round'
     this.lineTo(x, y)
+    this.ctx.globalCompositeOperation = 'source-over'
     return [MouseType.ERASER, x, y, this.radius]
+  }
+
+  mosaic(imageData: ImageData): ImageData {
+    const [doc] = [this.doc]
+
+    const options = {
+      resolution: 8 
+    }
+
+    let canvas = doc.createElement('canvas')
+    let ctx = canvas.getContext('2d')
+
+    if (!ctx) { return new ImageData(0, 0)}
+
+    canvas.width = imageData.width
+    canvas.height = imageData.height
+    ctx.putImageData(imageData, 0, 0)
+
+    let rows = canvas.height / options.resolution
+    let cols = canvas.width / options.resolution
+    let r, g, b, a
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+
+        // let tempData = ctx.getImageData(col * options.resolution, row * options.resolution, 1, 1).data
+        // r = tempData[0]
+        // g = tempData[1]
+        // g = tempData[2]
+        // a = tempdata[3] / 255
+
+        r = imageData.data[(row * options.resolution * canvas.width + col * options.resolution) * 4 + 0]
+        g = imageData.data[(row * options.resolution * canvas.width + col * options.resolution) * 4 + 1]
+        b = imageData.data[(row * options.resolution * canvas.width + col * options.resolution) * 4 + 2]
+        a = imageData.data[(row * options.resolution * canvas.width + col * options.resolution) * 4 + 3]
+
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`
+        ctx.fillRect(col * options.resolution, row * options.resolution, options.resolution, options.resolution)
+      }
+    }
+
+    return ctx.getImageData(0, 0, canvas.width, canvas.height)
   }
 
   drawByEvent(event: any): any[] {
@@ -312,7 +371,7 @@ class PhotoCover {
       left: left,
       top: top,
       width: Math.abs(w),
-      height: Math.abs(h) 
+      height: Math.abs(h)
     }
   }
 
@@ -382,7 +441,8 @@ class PhotoCover {
 
     ctx.save()
 
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    // ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    ctx.drawImage(this.img, 0, 0, this.canvas.width, this.canvas.height)
     this.histories.pop()
 
     this.histories.map((steps: Array<any>) => {
@@ -394,9 +454,13 @@ class PhotoCover {
         } else if (step[0] === MouseType.ERASER) {
           this.setRadius(step[3])
           this.erase(step[1], step[2])
+          this.combineWithBackground()
         } else if (step[0] === 'MOVE_TO') {
           ctx.beginPath()
           ctx.moveTo.apply(ctx, step.slice(1))
+        } else if (step[0] === MouseType.MOSAIC) {
+          let imageData = this.ctx.getImageData(step[1], step[2], step[3], step[4])
+          this.ctx.putImageData(this.mosaic(imageData), step[1], step[2], 0, 0, step[3], step[4])
         }
       })
     })
@@ -426,21 +490,42 @@ class PhotoCover {
   }
 
   getDataURL(type = 'image/jpeg', quality = 0.8, callback?: Function) {
-
-    let src = this.img.src
-
-    this.getImageOriginSize(src, (width: number, height: number) => {
-      let tempCanvas = document.createElement('canvas')
-      tempCanvas.width = width
-      tempCanvas.height = height
-      let tempCtx = tempCanvas.getContext('2d')
-      if (tempCtx) {
-        tempCtx.drawImage(this.img, 0, 0, width, height)
-        tempCtx.drawImage(this.canvas, 0, 0, width, height)
-
-        callback && callback(tempCanvas.toDataURL(type, quality))
-      }
+    this.combineWithBackground((canvas: any) => {
+      callback && callback(canvas.toDataURL(type, quality))
     })
+
+    // let src = this.img.src
+
+    // this.getImageOriginSize(src, (width: number, height: number) => {
+    //   let tempCanvas = document.createElement('canvas')
+    //   tempCanvas.width = width
+    //   tempCanvas.height = height
+    //   let tempCtx = tempCanvas.getContext('2d')
+    //   if (tempCtx) {
+    //     tempCtx.drawImage(this.img, 0, 0, width, height)
+    //     tempCtx.drawImage(this.canvas, 0, 0, width, height)
+
+    //     callback && callback(tempCanvas.toDataURL(type, quality))
+    //   }
+    // })
+  }
+
+
+  combineWithBackground(callback?: Function) {
+    const doc = this.doc
+    let canvas = doc.createElement('canvas')
+    canvas.width = this.canvas.width
+    canvas.height = this.canvas.height
+
+    let ctx = canvas.getContext('2d')
+
+    if (!ctx) { return }
+
+    ctx.drawImage(this.img, 0, 0, canvas.width, canvas.height)
+    ctx.drawImage(this.canvas, 0, 0, canvas.width, canvas.height)
+
+    this.ctx.drawImage(canvas, 0, 0, this.canvas.width, this.canvas.height)
+    callback && callback(canvas, ctx)
   }
 
   /**

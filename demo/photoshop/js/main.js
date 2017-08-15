@@ -112,4 +112,8 @@ window.onkeydown = function (e) {
   if (e.keyCode === 90 || e.key === 'z') {
     $('#undo').click()
   }
+
+  if (e.key === 'm') {
+    $('#mosaic').click()
+  }
 }
