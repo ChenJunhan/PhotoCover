@@ -18,7 +18,7 @@
 
 <body>
   <img src="images/cat.jpg" alt="cat" id="originImg">
-  <aside>
+  <aside class="tool-bar">
     <ul>
       <li><button id="pen" name="mouseType" class="selected"><i class="fa fa-pencil"></i></button></li>
       <li><button id="eraser" name="mouseType"><i class="fa fa-eraser"></i></button></li>
@@ -41,6 +41,14 @@
         </div>
       </li>
     </ul>
+  </aside>
+  <aside class="history-bar">
+    <section>
+      <header>历史记录</header>
+      <ul id="history">
+        <li><i class="fa fa-eraser"></i>橡皮擦</li>
+      </ul>
+    </section>
   </aside>
   <script src="js/photocover.js" charset="utf-8"></script>
   <script src="js/main.js" charset="utf-8"></script>

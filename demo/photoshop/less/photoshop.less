@@ -52,13 +52,13 @@ body {
   color: white;
 }
 
-aside {
+aside.tool-bar {
   position: fixed;
   left: 0;
   top: 0;
   background-color: rgb(66, 66, 66);
   width: 38px;
-  // height: 100%;
+  height: 100%;
   padding: 3px;
 
   ul {
@@ -118,6 +118,41 @@ aside {
             cursor: pointer;
         }
       }
+    }
+  }
+}
+
+aside.history-bar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  background-color: rgb(66, 66, 66);
+  width: 200px;
+  height: 100%;
+  padding: 3px;
+  color: #fff;
+  font-size: 12px;
+
+  header {
+    padding-bottom: 3px;
+    padding: 3px;
+    text-align: center;
+    border-bottom: 1px solid #707070;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    border-bottom: 1px solid #454545;
+    background: #535353;
+    height: 30px;
+    line-height: 30px;
+    i {
+      margin: 0 10px;
     }
   }
 }

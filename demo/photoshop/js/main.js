@@ -24,6 +24,33 @@ window.onload = function () {
 
   var draw = new PhotoCover('#originImg')
 
+  $('#originImg').addEventListener('historyChange', e => {
+    let histories = e.detail
+    let operates = []
+
+    let lis = histories.reduce((previous, his) => {
+      let className = ''
+      let text = ''
+
+      switch(his[his.length -1][0]) {
+        case MouseType.PEN: className = 'pencil'; text = '涂鸦'; break;
+        case MouseType.ERASER: className = 'eraser'; text = '橡皮擦'; break;
+        case MouseType.MOSAIC: className = 'square'; text = '马赛克'; break;
+        default: operate = '其它操作';
+      }
+
+      return previous += `<li><i class="fa fa-${className}"></i>${text}</li>`
+    }, '')
+
+    $('#history').innerHTML = lis
+
+
+  }, false)
+
+  // draw.on('historyChange', (histories) => {
+  //   console.log(histories)
+  // })
+
   $('#pen').addEventListener(click, function () {
     draw.setPen()
   }, false)

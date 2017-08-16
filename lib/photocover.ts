@@ -39,6 +39,7 @@ class PhotoCover {
 
   histories: any[][] = []    // operate history
   bindedEvents: any[][] = []    // registered events [node, type, function]
+  historyChange: Event = new CustomEvent('historyChange', { detail: this.histories })
 
   constructor(selector: HTMLImageElement | string) {
 
@@ -143,6 +144,7 @@ class PhotoCover {
         mouseDownOnCanvas  = false
         if (this.mouseType === MouseType.PEN || this.mouseType === MouseType.ERASER) {
           this.histories.push(currentOperate)
+          this.img.dispatchEvent(this.historyChange)
           currentOperate = []
         } else if (this.mouseType === MouseType.MOSAIC) {
           let rect = this.limitRect(this.caculateRect(startX, startY, e.pageX, e.pageY))
@@ -153,6 +155,7 @@ class PhotoCover {
             this.ctx.putImageData(this.mosaic(imageData), x, y, 0, 0, rect.width, rect.height)
 
             this.histories.push([[MouseType.MOSAIC, x, y, rect.width, rect.height]])
+            this.img.dispatchEvent(this.historyChange)
           }
 
           body.removeChild(mosaicSelection)
@@ -444,6 +447,7 @@ class PhotoCover {
     // ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     ctx.drawImage(this.img, 0, 0, this.canvas.width, this.canvas.height)
     this.histories.pop()
+    this.img.dispatchEvent(this.historyChange)
 
     this.histories.map((steps: Array<any>) => {
       steps.map((step: Array<any>) => {
