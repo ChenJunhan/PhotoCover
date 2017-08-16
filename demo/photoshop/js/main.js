@@ -26,30 +26,27 @@ window.onload = function () {
 
   $('#originImg').addEventListener('historyChange', e => {
     let histories = e.detail
-    let operates = []
 
     let lis = histories.reduce((previous, his) => {
       let className = ''
       let text = ''
+      let color = ''
+      let operate = his.length > 1 ? his[1] : his[0]
 
-      switch(his[his.length -1][0]) {
-        case MouseType.PEN: className = 'pencil'; text = '涂鸦'; break;
-        case MouseType.ERASER: className = 'eraser'; text = '橡皮擦'; break;
-        case MouseType.MOSAIC: className = 'square'; text = '马赛克'; break;
-        default: operate = '其它操作';
+      switch(operate[0]) {
+        case MouseType.PEN: className = 'pencil'; text = 'Graffiti'; color = `<i class="fa fa-stop" style="color: ${operate[1]}"></i>`; break;
+        case MouseType.ERASER: className = 'eraser'; text = 'Eraser'; break;
+        case MouseType.MOSAIC: className = 'th'; text = 'Mosaic'; break;
+        default: className = 'question'; text = 'Other';;
       }
 
-      return previous += `<li><i class="fa fa-${className}"></i>${text}</li>`
+      return previous += `<li><i class="fa fa-${className}"></i>${text}${color}</li>`
     }, '')
 
     $('#history').innerHTML = lis
 
 
   }, false)
-
-  // draw.on('historyChange', (histories) => {
-  //   console.log(histories)
-  // })
 
   $('#pen').addEventListener(click, function () {
     draw.setPen()
