@@ -98,7 +98,7 @@ gulp.task('scripts', () => {
 gulp.task('styles:demo', () => {
   return gulp.src(source.styles.demo)
     .pipe($.if(useSourceMaps, $.sourcemaps.init()))
-    .pipe($.less().on('error', function () {this.emit('end')}))
+    .pipe($.less().on('error', function (e) {console.error(e.message);this.emit('end')}))
     .pipe($.autoprefixer({
       browsers: ['last 2 version']
     }))
