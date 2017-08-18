@@ -7,6 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>demo</title>
   <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/input_range.css">
   <link rel="stylesheet" href="css/photoshop.css">
   <link href="https://cdn.bootcss.com/animate.css/3.5.2/animate.min.css" rel="stylesheet">
   <style>
@@ -17,38 +18,102 @@
 </head>
 
 <body>
-  <img src="images/cat.jpg" alt="cat" id="originImg">
-  <aside class="tool-bar">
-    <ul>
-      <li><button id="pen" name="mouseType" class="selected" title="Graffiti"><i class="fa fa-pencil"></i></button></li>
-      <li><button id="eraser" name="mouseType" title="Eraser"><i class="fa fa-eraser"></i></button></li>
-      <li><button id="mosaic" name="mouseType" title="Mosaic"><i class="fa fa-th"></i></button></li>
-      <li><button id="zoomIn" title="press shift + ="><i class="fa fa-plus"></i></button></li>
-      <li><button id="zoomOut" title="press shift + -"><i class="fa fa-minus"></i></button></li>
-      <li><button id="undo"><i class="fa fa-undo"></i></button></li>
-      <li><button id="save" title="save"><i class="fa fa-save"></i></button></li>
-      <li>
-        <button class="colorPicker" style="color: black"><i class="fa fa-stop"></i></button>
-        <div class="color-box animated">
-          <i class="fa fa-stop black"></i>
-          <i class="fa fa-stop red"></i>
-          <i class="fa fa-stop blue"></i>
-          <i class="fa fa-stop lightBlue"></i>
-          <i class="fa fa-stop yellow"></i>
-          <i class="fa fa-stop green"></i>
-          <i class="fa fa-stop purple"></i>
-          <i class="fa fa-stop white"></i>
+  <div class="layout">
+    <div class="layout-top">
+      <!-- header bar for set property of tool -->
+      <aside class="head-bar">
+
+        <!-- graffiti -->
+        <div class="tool-box tool-graffiti show" id="graffitiToolbox">
+
+          <div class="current-tool">
+            <span>Graffiti</span>
+            <i class="fa fa-pencil"></i>
+          </div>
+
+          <div class="tool-radius">
+            <span class="tool-title">radius:</span>
+            <button id="buttonGraffitiDescreaseRadius"><i class="fa fa-minus"></i></button>
+            <div class="range-box"><input type="range" min="1" max="100" step="1" value="20" id="rangeGraffitiRadius"></div>
+            <button id="buttonGraffitiIncreaseRadius"><i class="fa fa-plus"></i></button>
+            <input type="text" maxLength="3" value="20" id="textGraffitiRadius">
+          </div>
+          
+          <div class="tool-color-picker">
+            <span class="tool-title">color:</span>
+            <input type="color" id="colorPicker" value="#000000">
+          </div>
+
         </div>
-      </li>
-    </ul>
-  </aside>
-  <aside class="history-bar">
-    <section>
-      <header>History</header>
-      <ul id="history">
-      </ul>
-    </section>
-  </aside>
+
+        <!-- eraser -->
+        <div class="tool-box tool-eraser" id="eraserToolbox">
+
+          <div class="current-tool">
+            <span>Eraser</span>
+            <i class="fa fa-eraser"></i>
+          </div>
+
+          <div class="tool-radius">
+            <span class="tool-title">radius:</span>
+            <button id="buttonEraserDescreaseRadius"><i class="fa fa-minus"></i></button>
+            <div class="range-box"><input type="range" min="1" max="100" step="1" value="20" id="rangeEraserRadius"></div>
+            <button id="buttonEraserIncreaseRadius"><i class="fa fa-plus"></i></button>
+            <input type="text" maxLength="3" value="20" id="textEraserRadius">
+          </div>
+
+        </div>
+
+        <!-- mosaic -->
+        <div class="tool-box tool-mosaic" id="mosaicToolbox">
+            
+          <div class="current-tool">
+            <span>Mosaic</span>
+            <i class="fa fa-th"></i>
+          </div>
+
+          <div class="tool-radius">
+            <span class="tool-title">radius:</span>
+            <button id="buttonMosaicDescreaseResolution"><i class="fa fa-minus"></i></button>
+            <div class="range-box"><input type="range" min="4" max="50" step="1" value="8" id="rangeMosaicResolution"></div>
+            <button id="buttonMosaicIncreaseResolution"><i class="fa fa-plus"></i></button>
+            <input type="text" maxLength="3" value="8" id="textMosaicResolution">
+          </div>
+
+        </div>
+      </aside>
+    </div>
+
+    <div class="layout-bottom">
+
+      <!-- tool bar -->
+      <aside class="tool-bar">
+        <ul>
+          <li><button id="graffiti" name="mouseType" class="selected" title="Graffiti"><i class="fa fa-pencil"></i></button></li>
+          <li><button id="eraser" name="mouseType" title="Eraser"><i class="fa fa-eraser"></i></button></li>
+          <li><button id="mosaic" name="mouseType" title="Mosaic"><i class="fa fa-th"></i></button></li>
+          <li><button id="undo"><i class="fa fa-undo"></i></button></li>
+        </ul>
+      </aside>
+
+      <!-- main content -->
+      <main class="main" role="main">
+        <img src="images/cat.jpg" alt="cat" id="originImg">
+      </main>
+
+      <!-- history bar -->
+      <aside class="history-bar">
+        <section>
+          <header>History</header>
+          <ul id="history">
+          </ul>
+        </section>
+      </aside>
+
+    </div>
+  </div>
+  
+  <script src="js/chang.js"></script>
   <script src="js/photocover.js" charset="utf-8"></script>
   <script src="js/main.js" charset="utf-8"></script>
 </body>

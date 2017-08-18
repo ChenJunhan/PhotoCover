@@ -4,6 +4,7 @@ const gulp = require('gulp')
 const $ = require('gulp-load-plugins')()
 const browserSync = require('browser-sync').create()
 const reload = browserSync.reload
+const stream = browserSync.stream
 
 let useSourceMaps = true
 let isProduction = !!args.prod
@@ -60,6 +61,7 @@ gulp.task('watch', () => {
   gulp.watch(source.html.demo).on('change', reload)
   gulp.watch(source.scripts.watch, ['scripts:demo'])
   gulp.watch(source.styles.demo, ['styles:demo'])
+  gulp.watch([source.scripts.demo, '!./demo/photoshop/js/photocover.js']).on('change', reload)
 })
 
 gulp.task('scripts:demo', () => {

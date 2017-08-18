@@ -1,5 +1,37 @@
+@bar-background: #424242;
+@tool-color: #ddd;
+html,
+body,
+ul,
+ol,
+li,
+dl,
+dt,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+div,
+header,
+main,
+aside,
+section,
+button {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+}
+
 body {
-  min-height: 100%;
+  overflow: auto;
+  height: 100%;
   background-color: #282828;
   font-family: "Consolas", "Microsoft Yahei", "Aria";
 }
@@ -31,69 +63,214 @@ body {
 .black {
   color: black;
 }
+
 .red {
   color: red;
 }
+
 .blue {
   color: blue;
 }
+
 .lightBlue {
   color: #00ffff;
 }
+
 .yellow {
   color: yellow;
 }
+
 .green {
   color: green;
 }
+
 .purple {
   color: purple;
 }
+
 .white {
   color: white;
 }
 
-aside.tool-bar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  background-color: rgb(66, 66, 66);
-  width: 38px;
+.layout {
   height: 100%;
-  padding: 3px;
+  display: flex;
+  flex-direction: column;
+  .layout-top {
+    .head-bar {
+      display: flex;
+      align-items: center;
+      height: 38px; // background: #6f6;
+      &>div {
+        display: none;
+        align-items: center;
+        height: 100%;
 
-  ul {
-    margin: 0;
-    padding: 3px 0;
+        &.show {
+          display: flex;
+        }
+      }
+    }
+  }
+  .layout-bottom {
+    display: flex;
+    flex-direction: row;
     height: 100%;
-    border: 1px solid #333;
-    background-color: rgb(83, 83, 83);
-    list-style: none;
+    .tool-bar {
+      flex-basis: 38px; // background-color: #f66;
+    }
+    .main {
+      flex-basis: 100%;
+      height: 100%; // background-color: #66f;
+    }
+    .history-bar {
+      flex-basis: 200px; // background-color: #ff6;
+    }
+  }
+}
 
-    li {
-      position: relative;
+button {
+  user-select: none;
+  outline: none;
+  width: 32px;
+  height: 30px;
+  font-size: 15px;
+  border: none;
+  background: none;
+  background-color: rgb(83, 83, 83);
+  color: @tool-color;
+
+  &:not(:disabled):hover,
+  &.selected {
+    background-color: #424242;
+  }
+  &:not(:disabled):active {
+    line-height: 1.1;
+  }
+}
+
+i {
+  color: @tool-color;
+}
+
+aside.head-bar {
+  margin-bottom: 1px;
+  background-color: @bar-background;
+  .tool-box {
+    & > * {
+      float: left;
+      height: 20px;
+      padding: 0 10px;
+      border-right: 1px solid #333;
+    }
+  }
+  .tool-title {
+    display: inline-block;
+    padding: 2px;
+    font-size: 12px;
+    background-color: #333;
+    color: #757575;
+    border-radius: 2px;
+    user-select: none;
+  }
+  .tool-box {
+    input[type=text] {
+      padding: 0 3px;
+      height: 14px;
+      border: 1px solid #666666;
       text-align: center;
+      background-color: #454545;
+      outline: none;
+      color: #ccc;
+      font-size: 10px;
+    }
+    .current-tool {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: 100%;
+      border-right: 1px solid #333;
+      width: 60px;
+      background-color: #D45757;
+      text-align: center;
+      box-shadow: inset 0 0 20px #222222;
+      span {
+        font-size: 10px;
+        color: lighten(#D45757, 30%);
+        user-select: none;
+      }
+      i {
+        color: lighten(#d45757, 30%);
+      }
+    }
+    .tool-radius {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      & > * {
+        float: left;
+      }
 
       button {
-        user-select: none;
-        outline: none;
-        margin-bottom: 2px;
-        width: 32px;
-        height: 30px;
-        font-size: 15px;
-        border: none;
         background: none;
-        background-color: rgb(83, 83, 83);
-        color: #ddd;
-
-        &:hover, &.selected {
-          background-color: rgb(66, 66, 66);
-        }
-        &:active {
-          line-height: 1.1;
+        &:hover {
+          background: #393939
         }
       }
 
+      .range-box {
+        margin: 0 2px;
+        width: 100px;
+        height: 26px;
+        vertical-align: middle;
+      }
+
+      input[type=text] {
+        width: 22px;
+      }
+    }
+    .tool-color-picker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      i {
+        margin: 0 3px;
+      }
+      input[type=text] {
+        width: 44px;
+      }
+      input[type=color] {
+        border: none;
+        background: none;
+        box-shadow: none;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        font-size: 0;
+        outline: none;
+      }
+    }
+  }
+}
+
+aside.tool-bar {
+  background-color: @bar-background;
+  padding: 3px;
+  ul {
+    margin: 0;
+    padding: 0;
+    border: 1px solid #333;
+    background-color: rgb(83, 83, 83);
+    list-style: none;
+    li {
+      position: relative;
+      text-align: center;
+      .colorPicker {
+        i {
+          color: inherit;
+        }
+      }
       .color-box {
         display: flex;
         background: gray;
@@ -105,7 +282,6 @@ aside.tool-bar {
         padding: 0 2px;
         margin-top: -10px;
         align-items: center;
-
         &:before {
           position: absolute;
           left: -10px;
@@ -113,10 +289,9 @@ aside.tool-bar {
           border: 5px solid;
           border-color: transparent gray transparent transparent;
         }
-
         i {
-            margin: 0 2px;
-            cursor: pointer;
+          margin: 0 2px;
+          cursor: pointer;
         }
       }
     }
@@ -124,23 +299,19 @@ aside.tool-bar {
 }
 
 aside.history-bar {
-  position: fixed;
-  right: 0;
-  top: 0;
-  background-color: rgb(66, 66, 66);
+  overflow: auto;
+  background-color: @bar-background;
   width: 200px;
-  height: 100%;
   padding: 3px;
   color: #fff;
   font-size: 12px;
-
+  user-select: none;
   header {
     padding-bottom: 3px;
     padding: 3px;
     text-align: center;
     border-bottom: 1px solid #707070;
   }
-
   ul {
     overflow: auto;
     max-height: 100%;
@@ -148,7 +319,6 @@ aside.history-bar {
     padding: 0;
     list-style: none;
   }
-
   li {
     border-bottom: 1px solid #454545;
     background: #535353;
@@ -163,8 +333,7 @@ aside.history-bar {
 #originImg {
   display: block;
   width: 800px;
-  margin: 20px auto;
-  box-shadow: 0px 0px 100px 30px black;
+  margin: 20px auto; // box-shadow: 0px 0px 100px 30px black;
   user-select: none;
 }
 
@@ -174,8 +343,7 @@ aside.history-bar {
   }
 }
 
-@media screen and (min-width: 640px) {
-}
+@media screen and (min-width: 640px) {}
 
 canvas {
   user-select: none;

@@ -1,4 +1,4 @@
-enum MouseType { PEN, ERASER, MOSAIC }
+enum MouseType { GRAFFITI, ERASER, MOSAIC }
 
 interface Rect {
   left: number;
@@ -9,9 +9,10 @@ interface Rect {
 
 class PhotoCover {
   static DEFAULT_RADIUS:number = 20
+  static DEFAULT_RESOLUTION:number = 8
   static DEFAULT_MAX_WIDTH:number = 800
   static DEFAULT_COLOR: string = 'black'
-  static DEFAULT_PEN_BORDER_COLOR: string = 'red'
+  static DEFAULT_GRAFFITI_BORDER_COLOR: string = 'red'
   static DEFAULT_ERASER_BORDER_COLOR:string = '#666'
   static DEFAULT_LINECAP: string = 'round'
   static DEFAULT_LINEJOIN: string = 'round'
@@ -30,8 +31,9 @@ class PhotoCover {
   ctx: CanvasRenderingContext2D = this.canvas.getContext('2d') as CanvasRenderingContext2D
 
   // init value
-  mouseType: MouseType = MouseType.PEN    // default mouse pointer
-  radius =  PhotoCover.DEFAULT_RADIUS    // default radius of pen
+  mouseType: MouseType = MouseType.GRAFFITI// default mouse pointer
+  radius =  PhotoCover.DEFAULT_RADIUS    // default radius of graffiti
+  resolution = PhotoCover.DEFAULT_RESOLUTION   // default resolution of mosaic
   maxWidth = PhotoCover.DEFAULT_MAX_WIDTH     // default max width of image
   color = PhotoCover.DEFAULT_COLOR    // default color of canvas
   lineCap = PhotoCover.DEFAULT_LINECAP    // default linecap of line on canvas
@@ -82,7 +84,7 @@ class PhotoCover {
     let startY: number
 
     let canvasMouseDown = ((e: any) => {
-      e.preventDefault()
+      // e.preventDefault()    // preventDefault would avoid input range click
 
       startX = e.pageX
       startY = e.pageY
@@ -93,7 +95,7 @@ class PhotoCover {
       if (this.isOnCanvas(e.pageX, e.pageY)) {
         mouseDownOnCanvas = true
 
-        if (this.mouseType === MouseType.PEN || this.mouseType === MouseType.ERASER) {
+        if (this.mouseType === MouseType.GRAFFITI|| this.mouseType === MouseType.ERASER) {
           this.ctx.beginPath()
           currentOperate.push(['MOVE_TO', x, y])
           currentOperate.push(this.drawByEvent(e))
@@ -124,7 +126,7 @@ class PhotoCover {
 
     let canvasMouseMove = ((e: any) => {
       e.preventDefault()
-      if (this.mouseType === MouseType.PEN || this.mouseType === MouseType.ERASER) {
+      if (this.mouseType === MouseType.GRAFFITI || this.mouseType === MouseType.ERASER) {
         currentOperate.push(this.drawByEvent(e))
       } else if (this.mouseType === MouseType.MOSAIC) {
         let rect = this.limitRect(this.caculateRect(startX, startY, e.pageX, e.pageY))
@@ -142,7 +144,7 @@ class PhotoCover {
       
       if (mouseDownOnCanvas) {
         mouseDownOnCanvas  = false
-        if (this.mouseType === MouseType.PEN || this.mouseType === MouseType.ERASER) {
+        if (this.mouseType === MouseType.GRAFFITI || this.mouseType === MouseType.ERASER) {
           this.histories.push(currentOperate)
           this.img.dispatchEvent(this.historyChange)
           currentOperate = []
@@ -230,7 +232,7 @@ class PhotoCover {
   }
 
   setRadius(radius: number) {
-    if (radius < 2 || radius > 100) {
+    if (radius < 1 || radius > 100) {
       return
     }
 
@@ -242,6 +244,14 @@ class PhotoCover {
       mouse.style.width = radius * 2 + 'px'
       mouse.style.height = radius * 2 + 'px'
     }
+  }
+
+  setResolution(resolution: number) {
+    if (resolution < 2 || resolution > 100) {
+      return
+    }
+
+    this.resolution = resolution 
   }
 
   zoomIn(radius:number = 2) {
@@ -268,7 +278,7 @@ class PhotoCover {
     this.lineCap = 'round'
     this.lineJoin = 'round'
     this.lineTo(x, y)
-    return [MouseType.PEN, this.color, x, y, this.radius]
+    return [MouseType.GRAFFITI, this.color, x, y, this.radius]
   }
 
   erase(x: number, y: number): any[] {
@@ -284,7 +294,7 @@ class PhotoCover {
     const [doc] = [this.doc]
 
     const options = {
-      resolution: 8 
+      resolution: this.resolution
     }
 
     let canvas = doc.createElement('canvas')
@@ -325,7 +335,7 @@ class PhotoCover {
   drawByEvent(event: any): any[] {
     let [x, y] = this.getCoordinateByEvent(event)
 
-    if (this.mouseType === MouseType.PEN) { return this.drawLine(x, y) }
+    if (this.mouseType === MouseType.GRAFFITI) { return this.drawLine(x, y) }
     else if (this.mouseType === MouseType.ERASER) { return this.erase(x, y) }
     else { return [] }
   }
@@ -404,23 +414,23 @@ class PhotoCover {
   setTool(tool: MouseType) {
     this.mouseType = tool
 
-    if (tool === MouseType.PEN) {
-      this.setPen()
+    if (tool === MouseType.GRAFFITI) {
+      this.setGraffiti()
     } else if (tool === MouseType.ERASER) {
       this.setEraser()
     } else if (tool = MouseType.MOSAIC) {
     }
   }
 
-  setPen() {
+  setGraffiti() {
     if (this.mouse) {
       (Object as any).assign(this.mouse.style, {
         borderRadius: '100%',
-        border: `1px solid ${PhotoCover.DEFAULT_PEN_BORDER_COLOR}`
+        border: `1px solid ${PhotoCover.DEFAULT_GRAFFITI_BORDER_COLOR}`
       })
     }
 
-    this.mouseType = MouseType.PEN
+    this.mouseType = MouseType.GRAFFITI
   }
 
   setEraser() {
@@ -451,7 +461,7 @@ class PhotoCover {
 
     this.histories.map((steps: Array<any>) => {
       steps.map((step: Array<any>) => {
-        if (step[0] === MouseType.PEN) {
+        if (step[0] === MouseType.GRAFFITI) {
           this.color = step[1]
           this.setRadius(step[4])
           this.drawLine(step[2], step[3])
