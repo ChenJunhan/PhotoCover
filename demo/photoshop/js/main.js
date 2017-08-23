@@ -27,7 +27,7 @@ $(window).on('load', function () {
         default: className = 'question'; text = 'Other';;
       }
 
-      return previous += `<li><i class="fa fa-${className}"></i>${text}${color}</li>`
+      return previous += `<li"><i class="fa fa-${className}"></i>${text}${color}</li>`
     }, '')
 
     $('#history')[0].innerHTML = lis
@@ -174,6 +174,45 @@ $(window).on('load', function () {
   $('#save').on(click, function () {
     var dataurl = draw.getDataURL()
   }, false)
+
+  // choose History
+  $('#history').on(click,'li', (e, index) => {
+    currentStep = draw.histories.slice(0, index+1);
+    // addClass 'active'
+    if (e.target.tagName === 'LI') {
+      e.target.className = 'active';
+      $(e.target).siblings().removeClass('active');
+    }else {
+      e.target.parentNode.className = 'active';
+      $(e.target.parentNode).siblings().removeClass('active');
+    }
+    draw.ctx.save();
+    // ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    draw.ctx.drawImage(draw.img, 0, 0, draw.canvas.width, draw.canvas.height);
+    currentStep.map(function (steps) {
+      steps.map((step) => {
+        if (step[0] === MouseType.GRAFFITI) {
+            draw.color = step[1];
+            draw.setRadius(step[4]);
+            draw.drawLine(step[2], step[3]);
+        }
+        else if (step[0] === MouseType.ERASER) {
+            draw.setRadius(step[3]);
+            draw.erase(step[1], step[2]);
+            draw.combineWithBackground();
+        }
+        else if (step[0] === 'MOVE_TO') {
+            draw.ctx.beginPath();
+            draw.ctx.moveTo.apply(draw.ctx, step.slice(1));
+        }
+        else if (step[0] === MouseType.MOSAIC) {
+            var imageData = draw.ctx.getImageData(step[1], step[2], step[3], step[4]);
+            draw.ctx.putImageData(draw.mosaic(imageData), step[1], step[2], 0, 0, step[3], step[4]);
+        }
+      })
+    });
+    draw.ctx.restore();
+  })
  
 })
 

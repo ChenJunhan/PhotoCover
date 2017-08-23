@@ -93,13 +93,30 @@
 
   $.fn.init.prototype = $.fn
 
-  $.fn.init.prototype.on = function (eventType, callback) {
-    for (var i = 0; i < this.length; i++) {
-      !function (index, node) {
-        node.addEventListener(eventType, function (e) {
-          callback.call(node, e)
-        }, false);
-      } (i, this[i])
+  $.fn.init.prototype.on = function (eventType, child, callback) {
+    if (typeof child === 'function') {
+      callback = child;
+      for (var i = 0; i < this.length; i++) {
+        !function (index, node) {
+          node.addEventListener(eventType, function (e) {
+            callback.call(node, e)
+          }, false);
+        } (i, this[i])
+      }
+    }else {
+      for (var i = 0; i < this.length; i++) {
+        !function (index, node) {
+          node.addEventListener(eventType, function (e) {
+            let children = document.querySelectorAll(`#${node.id} ${child}`);
+            let current = e.target;
+            children.forEach((element, index) => {
+              if (element === current || element === current.parentNode) {
+                  callback.call(node, e, index)
+              }
+            })
+          }, false);
+        } (i, this[i])
+      }
     }
 
     return this

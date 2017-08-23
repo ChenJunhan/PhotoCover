@@ -438,6 +438,8 @@ var PhotoCover = (function () {
         });
         // delete this
     };
+
+    
     PhotoCover.DEFAULT_RADIUS = 20;
     PhotoCover.DEFAULT_RESOLUTION = 8;
     PhotoCover.DEFAULT_MAX_WIDTH = 800;
@@ -446,6 +448,7 @@ var PhotoCover = (function () {
     PhotoCover.DEFAULT_ERASER_BORDER_COLOR = '#666';
     PhotoCover.DEFAULT_LINECAP = 'round';
     PhotoCover.DEFAULT_LINEJOIN = 'round';
+    console.log(PhotoCover);
     return PhotoCover;
 }());
 
