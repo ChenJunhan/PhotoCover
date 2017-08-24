@@ -176,6 +176,14 @@ $(window).on('load', function () {
     var dataurl = draw.getDataURL()
   }, false)
 
+  $('#magnify').on(click, function () {
+    draw.magnify();
+  })
+
+  $('#shrink').on(click, function () {
+    draw.shrink();
+  })
+
   // choose History
   $('#history').on(click,'li', (e, index) => {
     currentStep = draw.histories.slice(0, index+1);

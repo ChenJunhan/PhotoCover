@@ -24,6 +24,7 @@ var PhotoCover = (function () {
         this.histories = []; // operate history
         this.bindedEvents = []; // registered events [node, type, function]
         this.historyChange = new CustomEvent('historyChange', { detail: this.histories });
+        this.percent = 1; // zoom percent
         if (typeof selector === 'object') {
             this.img = selector;
         }
@@ -439,6 +440,38 @@ var PhotoCover = (function () {
         // delete this
     };
 
+    PhotoCover.prototype.magnify = function () {
+        
+        if (this.percent >= 2) {
+            return;
+        }else {
+            this.percent += 0.2;
+        }
+        this.percent = parseFloat(this.percent.toFixed(1));
+        this.zoom()
+    }
+
+    PhotoCover.prototype.shrink = function () {
+        if (this.percent <= 0.4) {
+            return
+        }else {
+            this.percent -= 0.2;
+        }
+        this.percent = parseFloat(this.percent.toFixed(1));
+        this.zoom()
+    }
+
+    PhotoCover.prototype.zoom = function() {
+        let width = this.canvas.width * this.percent,
+            height = this.canvas.height * this.percent,
+            originX = (width - this.canvas.width)/2,
+            originY = (height - this.canvas.height)/2;
+        this.ctx.save()
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+        this.ctx.drawImage(this.img, -originX, -originY, width, height)
+        this.ctx.restore()
+    }
+
     
     PhotoCover.DEFAULT_RADIUS = 20;
     PhotoCover.DEFAULT_RESOLUTION = 8;
@@ -448,7 +481,6 @@ var PhotoCover = (function () {
     PhotoCover.DEFAULT_ERASER_BORDER_COLOR = '#666';
     PhotoCover.DEFAULT_LINECAP = 'round';
     PhotoCover.DEFAULT_LINEJOIN = 'round';
-    console.log(PhotoCover);
     return PhotoCover;
 }());
 
