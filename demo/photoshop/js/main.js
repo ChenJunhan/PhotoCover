@@ -19,6 +19,7 @@ $(window).on('load', function () {
       let text = ''
       let color = ''
       let operate = his.length > 1 ? his[1] : his[0]
+      let isFinally = histories.indexOf(his) === histories.length - 1 ? 'active' : ''
 
       switch(operate[0]) {
         case MouseType.GRAFFITI: className = 'pencil'; text = 'Graffiti'; color = `<i class="fa fa-stop" style="color: ${operate[1]}"></i>`; break;
@@ -27,10 +28,10 @@ $(window).on('load', function () {
         default: className = 'question'; text = 'Other';;
       }
 
-      return previous += `<li"><i class="fa fa-${className}"></i>${text}${color}</li>`
+      return previous += `<li class="${isFinally}"><i class="fa fa-${className}"></i>${text}${color}</li>`
     }, '')
 
-    $('#history')[0].innerHTML = lis
+    $('#history')[0].innerHTML = `<li><i class="fa fa-file-image-o"></i>restore</li>${lis}`
   }, false)
 
 
@@ -189,28 +190,34 @@ $(window).on('load', function () {
     draw.ctx.save();
     // ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     draw.ctx.drawImage(draw.img, 0, 0, draw.canvas.width, draw.canvas.height);
-    currentStep.map(function (steps) {
-      steps.map((step) => {
-        if (step[0] === MouseType.GRAFFITI) {
-            draw.color = step[1];
-            draw.setRadius(step[4]);
-            draw.drawLine(step[2], step[3]);
-        }
-        else if (step[0] === MouseType.ERASER) {
-            draw.setRadius(step[3]);
-            draw.erase(step[1], step[2]);
-            draw.combineWithBackground();
-        }
-        else if (step[0] === 'MOVE_TO') {
-            draw.ctx.beginPath();
-            draw.ctx.moveTo.apply(draw.ctx, step.slice(1));
-        }
-        else if (step[0] === MouseType.MOSAIC) {
-            var imageData = draw.ctx.getImageData(step[1], step[2], step[3], step[4]);
-            draw.ctx.putImageData(draw.mosaic(imageData), step[1], step[2], 0, 0, step[3], step[4]);
-        }
-      })
-    });
+
+    if (index !== 0) {
+      if (index !== currentStep.length) {
+        currentStep = currentStep.slice(0, currentStep.length-1)
+      }
+      currentStep.map(function (steps) {
+        steps.map((step) => {
+          if (step[0] === MouseType.GRAFFITI) {
+              draw.color = step[1];
+              draw.setRadius(step[4]);
+              draw.drawLine(step[2], step[3]);
+          }
+          else if (step[0] === MouseType.ERASER) {
+              draw.setRadius(step[3]);
+              draw.erase(step[1], step[2]);
+              draw.combineWithBackground();
+          }
+          else if (step[0] === 'MOVE_TO') {
+              draw.ctx.beginPath();
+              draw.ctx.moveTo.apply(draw.ctx, step.slice(1));
+          }
+          else if (step[0] === MouseType.MOSAIC) {
+              var imageData = draw.ctx.getImageData(step[1], step[2], step[3], step[4]);
+              draw.ctx.putImageData(draw.mosaic(imageData), step[1], step[2], 0, 0, step[3], step[4]);
+          }
+        })
+      });
+    }
     draw.ctx.restore();
   })
  
